@@ -40,6 +40,8 @@ jobs:
           mkdir _site
           cp index.html data.json manifest.webmanifest sw.js _site/
           cp -r img _site/
+          # Versión de pruebas, si existe
+          if [ -d pruebas ]; then cp -r pruebas _site/; fi
 
       - uses: actions/upload-pages-artifact@v3
         with:
