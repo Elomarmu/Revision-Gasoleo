@@ -9,6 +9,9 @@
 <meta name="apple-mobile-web-app-title" content="Gasóleo">
 <link rel="icon" type="image/png" href="img/favicon.png">
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Revisión por gasóleo · Grupo Trimodos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -206,9 +209,11 @@ tr.in-real td{background:var(--band-b)}
     </div>
     <span id="stPill" class="pill info">Comprobando…</span>
     <div class="actions">
+      <button type="button" class="btn primary" id="btnInstall" hidden>Instalar app</button>
       <a class="btn" id="lnkMin" href="https://www.transportes.gob.es/transporte-terrestre/servicios-al-transportista/indice-de-variacion-semanal-de-los-precios-medios-del-gasoleo-en-espana" target="_blank" rel="noopener">Abrir página oficial ↗</a>
     </div>
     <p class="msg" id="stMsg"></p>
+    <p class="msg" id="installMsg" hidden></p>
   </section>
 
   <div class="pair">
@@ -363,7 +368,10 @@ const TX={
   dlCopied:"Imagen descargada y resumen copiado. Adjunta la imagen en WhatsApp.",dl:"Imagen descargada. Adjúntala en WhatsApp.",
   copied:"Imagen copiada. Pégala con Ctrl+V (⌘+V en Mac) en el chat de WhatsApp Web.",download:"Descargar la imagen",
   copied:"Imagen copiada. Pégala con Ctrl+V (⌘+V en Mac) en el chat de WhatsApp Web.",download:"Descargar la imagen",shareFail:m=>"No se pudo preparar la imagen ("+m+").",file:"revision-gasoleo.png",
-  title:"Revisión por gasóleo · Grupo Trimodos"},
+  title:"Revisión por gasóleo · Grupo Trimodos",
+  install:"Instalar app",installed:"App instalada. La encontrarás junto a tus otras aplicaciones.",
+  iosHelp:"Para instalarla en el iPhone o iPad: pulsa el botón Compartir de Safari (el cuadrado con la flecha) y elige «Añadir a pantalla de inicio».",
+  offline:"Sin conexión: se muestran los últimos precios descargados."},
  en:{loc:"en-GB",pct:"%",
   loadFail:m=>"The prices could not be loaded ("+m+"). Reload the page in a few seconds.",noData:"No data",
   wNoMonth:"The Ministry has not published any prices for that month.",wNoDate:"The Ministry has not yet published a price on or after that date.",
@@ -392,7 +400,10 @@ const TX={
   dlCopied:"Image downloaded and summary copied. Attach the image in WhatsApp.",dl:"Image downloaded. Attach it in WhatsApp.",
   copied:"Image copied. Paste it with Ctrl+V (⌘+V on a Mac) into the WhatsApp Web chat.",download:"Download the image",
   copied:"Image copied. Paste it with Ctrl+V (⌘+V on a Mac) into the WhatsApp Web chat.",download:"Download the image",shareFail:m=>"The image could not be prepared ("+m+").",file:"diesel-price-revision.png",
-  title:"Diesel Price Revision · Grupo Trimodos"}
+  title:"Diesel Price Revision · Grupo Trimodos",
+  install:"Install app",installed:"App installed. You will find it with your other apps.",
+  iosHelp:"To install it on an iPhone or iPad: tap Safari's Share button (the square with the arrow) and choose “Add to Home Screen”.",
+  offline:"Offline: showing the latest downloaded prices."}
 };
 // Textos fijos de la página: [selector, contenido en inglés] (el español es el del propio HTML)
 const STATIC_EN=[
@@ -401,7 +412,7 @@ const STATIC_EN=[
  ["header.top .lede","Calculates the change in the diesel price (G), the coefficient C and the percentage by which the agreed haulage price must rise or fall, using the weekly prices published by the Spanish Ministry of Transport. Each price can be the one for a date or the average for a month."],
  [".status","@aria:Data status"],
  [".fact:nth-child(1) span","Ministry spreadsheet in use"],[".fact:nth-child(2) span","Latest week with a price"],[".fact:nth-child(3) span","Last data load"],
- ["#lnkMin","Open official page ↗"],
+ ["#lnkMin","Open official page ↗"],["#btnInstall","Install app"],
  ["#pRef .tag","Reference"],["#hRef","Contract date"],["#pReal .tag","Calculation"],["#hReal","Date of carriage"],
  ["#pRef .seg","@aria:Reference mode"],["#pReal .seg","@aria:Calculation mode"],
  [".seg button[data-mode=date]","Date"],[".seg button[data-mode=month]","Month"],
@@ -647,9 +658,23 @@ function renderStatus(){
   else{p.className="pill ok";p.textContent=L.stAuto;msg.textContent=L.msgAuto;}
 }
 applyStatic();sync();drawCTables();renderStatus();calc();
+
+// ---- App instalable (PWA) ----
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+const STANDALONE=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+const IOS=/iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+let promptInstalar=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();promptInstalar=e;if(!STANDALONE())$("btnInstall").hidden=false});
+window.addEventListener("appinstalled",()=>{promptInstalar=null;$("btnInstall").hidden=true;$("installMsg").hidden=false;$("installMsg").textContent=L.installed});
+if(IOS&&!STANDALONE())$("btnInstall").hidden=false;
+$("btnInstall").addEventListener("click",async()=>{
+  if(promptInstalar){promptInstalar.prompt();const r=await promptInstalar.userChoice.catch(()=>null);if(r&&r.outcome==="accepted")$("btnInstall").hidden=true;promptInstalar=null;return}
+  $("installMsg").hidden=false;$("installMsg").textContent=L.iosHelp;
+});
+if(!navigator.onLine){$("installMsg").hidden=false;$("installMsg").textContent=L.offline}
 document.querySelectorAll(".brand .lang button").forEach(b=>b.addEventListener("click",()=>{
   if(b.dataset.lang===LANG)return;LANG=b.dataset.lang;L=TX[LANG];try{localStorage.setItem("gasoleo-lang",LANG)}catch(e){}
-  $("shareMsg").textContent="";applyStatic();drawCTables();renderStatus();calc();
+  $("shareMsg").textContent="";$("installMsg").hidden=true;applyStatic();drawCTables();renderStatus();calc();
 }));
 
 // ---- Compartir el resultado como imagen ----
