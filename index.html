@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Calculadora de la revisión obligatoria del precio del transporte por carretera según la variación del gasóleo (Ley 15/2009, art. 38), con los precios semanales del Ministerio de Transportes.">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Gasóleo">
+<link rel="icon" type="image/png" href="img/favicon.png">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<title>Revisión por gasóleo · Grupo Trimodos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;700;800&family=Mulish:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: franja blanca de marca con los tres logotipos y raya tricolor (amarillo Trimodos, verde Stinsa, naranja Transargi), como en la app DECA; cabecera, estado, dos paneles enfrentados (referencia en verde Stinsa, cálculo en naranja Transargi), resultado en negro Trimodos con rótulos amarillos, gráfica y notas. */
+:root{
+  --bg:#f5f6f4; --surface:#ffffff; --sunk:#eceee9; --ink:#1d1d1b; --muted:#5f625c; --line:#dcdfd8;
+  --accent:#00857a; --accent-deep:#006b62; --accent-ink:#ffffff; --amber:#c4592a; --amber-soft:#fde6da; --sun:#fcda00;
+  --result-bg:#1d1d1b; --result-ink:#ffffff;
+  --good:#1f7a4a; --good-soft:#dcf1e5; --warn:#a85d00; --warn-soft:#fdebd3; --bad:#b3261e; --bad-soft:#fadcd9;
+  --band-a:rgba(0,159,146,.16); --band-b:rgba(241,126,73,.22);
+  --f-display:"Raleway","Segoe UI",system-ui,sans-serif;
+  --f-body:"Mulish",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f0f0e; --surface:#191918; --sunk:#222220; --ink:#f1f1ee; --muted:#a9aba5; --line:#2f2f2c;
+  --accent:#2cc4b5; --accent-deep:#00857a; --accent-ink:#0f0f0e; --amber:#f5925f; --amber-soft:#3d2417; --sun:#fcda00;
+  --result-bg:#232321; --result-ink:#ffffff;
+  --good:#5cc98d; --good-soft:#163828; --warn:#f0a050; --warn-soft:#3b2814; --bad:#f08a80; --bad-soft:#3d1c1a;
+  --band-a:rgba(44,196,181,.18); --band-b:rgba(245,146,95,.22); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f0f0e; --surface:#191918; --sunk:#222220; --ink:#f1f1ee; --muted:#a9aba5; --line:#2f2f2c;
+  --accent:#2cc4b5; --accent-deep:#00857a; --accent-ink:#0f0f0e; --amber:#f5925f; --amber-soft:#3d2417; --sun:#fcda00;
+  --result-bg:#232321; --result-ink:#ffffff;
+  --good:#5cc98d; --good-soft:#163828; --warn:#f0a050; --warn-soft:#3b2814; --bad:#f08a80; --bad-soft:#3d1c1a;
+  --band-a:rgba(44,196,181,.18); --band-b:rgba(245,146,95,.22); color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:1080px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:18px}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;letter-spacing:-.005em;text-wrap:balance;margin:0}
+h1{font-size:clamp(26px,4vw,36px);line-height:1.12;font-weight:800}
+h2{font-size:20px}
+h3{font-size:17px}
+.eyebrow{font-family:var(--f-display);font-weight:700;text-transform:uppercase;letter-spacing:.12em;font-size:12px;color:var(--accent)}
+
+/* Banda de marca */
+.brand{background:#ffffff;border-bottom:5px solid;border-image:linear-gradient(90deg,#fcda00 0 33.34%,#009f92 0 66.67%,#f17e49 0) 1}
+.brand-in{max-width:1080px;margin:0 auto;padding-block:14px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px}
+.brand a{display:inline-flex;align-items:center}
+.brand .gt{height:42px;width:auto;max-width:100%}
+.brand .units{display:flex;align-items:center;gap:18px}
+.brand .units img{height:30px;width:auto}
+.brand .units .sep{width:1px;height:30px;background:#dcdfd8}
+.brand .alt{font-family:var(--f-display);font-weight:800;color:#1d1d1b;font-size:18px;letter-spacing:.02em}
+.foot{display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:14px}
+.foot b{font-family:var(--f-display);color:var(--ink)}
+@media (max-width:520px){.brand-in{justify-content:center}.brand .gt{height:36px}.brand .units img{height:24px}.brand .units{gap:12px}}
+.mono,.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+p{margin:0}
+a{color:var(--accent)}
+header.top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
+header.top .lede{color:var(--muted);max-width:62ch}
+
+/* Franja de estado de los datos */
+.status{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.status .facts{display:flex;flex-wrap:wrap;gap:6px 18px;flex:1 1 320px;min-width:0}
+.status .fact{display:grid}
+.status .fact b{font-family:var(--f-mono);font-weight:500}
+#stOrigin{font-family:var(--f-body);font-weight:600}
+.status .fact span{font-size:12px;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:600;white-space:nowrap}
+.pill::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.pill.ok{background:var(--good-soft);color:var(--good)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.info{background:var(--sunk);color:var(--muted)}
+.status .actions{display:flex;flex-wrap:wrap;gap:8px}
+.status .msg{flex-basis:100%;font-size:13px;color:var(--muted)}
+.status .msg:empty{display:none}
+
+button,.btn{font:inherit;font-weight:600;font-size:14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none}
+button:hover,.btn:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button:disabled{opacity:.55;cursor:default}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* Paneles de precio */
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:12px;min-width:0}
+.panel header{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.panel .tag{justify-self:start;font-family:var(--f-display);font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:4px}
+.tag.ref{background:var(--band-a);color:var(--accent)}
+.tag.real{background:var(--band-b);color:var(--amber)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;border-radius:0;padding:6px 12px;background:transparent;font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.fields{display:flex;flex-wrap:wrap;gap:10px}
+.field{display:grid;gap:4px;flex:1 1 140px;min-width:0}
+.field label{font-size:12px;color:var(--muted);font-weight:500}
+input,select{font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 9px;width:100%;min-width:0}
+input[type=number]{font-family:var(--f-mono)}
+.readout{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;border-top:1px dashed var(--line);padding-top:10px}
+.readout .big{font-family:var(--f-mono);font-size:26px;font-weight:500}
+.readout .unit{color:var(--muted);font-size:13px}
+.readout .weeks{flex-basis:100%;font-size:13px;color:var(--muted)}
+
+/* Ajustes */
+.settings{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:12px}
+.settings .fields .field{flex:1 1 200px}
+.check{display:flex;gap:8px;align-items:center;font-size:14px}
+.check input{width:auto}
+.hint{font-size:12px;color:var(--muted)}
+
+/* Resultado */
+.result{background:var(--result-bg);color:var(--result-ink);border-top:5px solid var(--sun);border-radius:var(--r);padding:20px;display:grid;gap:16px}
+.result .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.result .k{font-family:var(--f-display);font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:13px;opacity:.85}
+.result .v{white-space:nowrap;font-family:var(--f-display);font-weight:800;font-size:clamp(32px,5vw,44px);line-height:1;font-variant-numeric:tabular-nums}
+.result .v.small{font-size:clamp(26px,4vw,34px)}
+.result .s{font-size:13px;opacity:.85;font-family:var(--f-mono)}
+.result .verdict{display:flex;flex-wrap:wrap;gap:10px;align-items:center;border-top:1px solid rgba(255,255,255,.25);padding-top:12px}
+:root[data-theme="dark"] .result .verdict{border-top-color:rgba(0,0,0,.25)}
+.result .verdict .pill{background:var(--surface)}
+.result .k{color:var(--sun);opacity:1}
+.result .formula{font-family:var(--f-mono);font-size:13px;opacity:.9}
+
+/* Gráfica */
+.chart{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:8px}
+.chart .legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
+.chart .legend i{display:inline-block;width:14px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.chart .svgbox{overflow-x:auto}
+svg text{fill:var(--muted);font-family:var(--f-mono);font-size:11px}
+
+/* Detalle y notas */
+details{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 16px}
+details summary{cursor:pointer;font-family:var(--f-display);font-weight:700;font-size:18px}
+details[open] summary{margin-bottom:10px}
+.tablebox{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{text-align:right;padding:5px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:600;color:var(--muted);font-size:12px}
+td{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+tr.in-ref td{background:var(--band-a)}
+tr.in-real td{background:var(--band-b)}
+.notes{display:grid;gap:8px;font-size:14px;max-width:80ch}
+.notes ul{margin:0;padding-left:20px;display:grid;gap:6px}
+.ctable{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.ctable table td,.ctable table th{text-align:left}
+.drop{border:2px dashed var(--line);border-radius:var(--r);padding:16px;display:grid;gap:8px;justify-items:start}
+.drop.over{border-color:var(--accent);background:var(--band-a)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+
+
+<div class="brand">
+  <div class="brand-in">
+    <a href="https://www.grupotrimodos.com/" target="_blank" rel="noopener" aria-label="Grupo Trimodos">
+      <img class="gt" src="img/trimodos.png" alt="Grupo Trimodos" width="186" height="42" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'alt',textContent:'GRUPO TRIMODOS'}))">
+    </a>
+    <div class="units">
+      <a href="https://www.grupotrimodos.com/stinsa" target="_blank" rel="noopener" aria-label="STINSA"><img src="img/stinsa.png" alt="Stinsa" width="107" height="30" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'alt',textContent:'STINSA'}))"></a>
+      <span class="sep" aria-hidden="true"></span>
+      <a href="https://www.grupotrimodos.com/transargi" target="_blank" rel="noopener" aria-label="TRANSARGI"><img src="img/transargi.png" alt="Transargi" width="131" height="30" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'alt',textContent:'TRANSARGI'}))"></a>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+  <header class="top">
+    <div style="display:grid;gap:6px">
+      <span class="eyebrow">Ley 15/2009, art. 38 · Orden FOM/1882/2012, condición 3.4</span>
+      <h1>Revisión del precio del transporte por gasóleo</h1>
+    </div>
+    <p class="lede">Calcula la variación del gasóleo (G), el coeficiente C y el porcentaje que debe subir o bajar el precio pactado, con los precios semanales que publica el Ministerio de Transportes. Cada precio puede ser el de una fecha o la media de un mes.</p>
+  </header>
+
+  <section class="status" aria-label="Estado de los datos">
+    <div class="facts">
+      <div class="fact"><b id="stFile">—</b><span>Excel del Ministerio en uso</span></div>
+      <div class="fact"><b id="stLast">—</b><span>Última semana con precio</span></div>
+      <div class="fact"><b id="stOrigin">—</b><span>Última actualización automática</span></div>
+    </div>
+    <span id="stPill" class="pill info">Comprobando…</span>
+    <div class="actions">
+      <a class="btn" id="lnkMin" href="https://www.transportes.gob.es/transporte-terrestre/servicios-al-transportista/indice-de-variacion-semanal-de-los-precios-medios-del-gasoleo-en-espana" target="_blank" rel="noopener">Abrir página oficial ↗</a>
+    </div>
+    <p class="msg" id="stMsg"></p>
+  </section>
+
+  <div class="pair">
+    <section class="panel" id="pRef" aria-labelledby="hRef">
+      <header>
+        <div style="display:grid;gap:4px"><span class="tag ref">Referencia</span><h2 id="hRef">Fecha del contrato</h2></div>
+        <div class="seg" role="group" aria-label="Modo de la referencia">
+          <button type="button" data-mode="date">Fecha</button><button type="button" data-mode="month">Mes</button>
+        </div>
+      </header>
+      <div class="fields">
+        <div class="field" data-for="date"><label for="refDate">Fecha</label><input type="date" id="refDate"></div>
+        <div class="field" data-for="month"><label for="refMonth">Mes</label><input type="month" id="refMonth"></div>
+      </div>
+      <div class="readout"><span class="big" id="refVal">—</span><span class="unit">€/litro</span><span class="weeks" id="refWeeks"></span></div>
+    </section>
+
+    <section class="panel" id="pReal" aria-labelledby="hReal">
+      <header>
+        <div style="display:grid;gap:4px"><span class="tag real">Cálculo</span><h2 id="hReal">Realización del transporte</h2></div>
+        <div class="seg" role="group" aria-label="Modo del cálculo">
+          <button type="button" data-mode="date">Fecha</button><button type="button" data-mode="month">Mes</button>
+        </div>
+      </header>
+      <div class="fields">
+        <div class="field" data-for="date"><label for="realDate">Fecha</label><input type="date" id="realDate"></div>
+        <div class="field" data-for="month"><label for="realMonth">Mes</label><input type="month" id="realMonth"></div>
+      </div>
+      <div class="readout"><span class="big" id="realVal">—</span><span class="unit">€/litro</span><span class="weeks" id="realWeeks"></span></div>
+    </section>
+  </div>
+
+  <section class="settings" aria-labelledby="hSet">
+    <h3 id="hSet">Vehículo y contrato</h3>
+    <div class="fields">
+      <div class="field"><label for="veh">Tipo de vehículo</label>
+        <select id="veh">
+          <option value="A">A · MMA ≥ 20.000 kg (salvo obras)</option>
+          <option value="B">B · MMA entre 3.500 y 20.000 kg (salvo obras)</option>
+          <option value="C">C · Obras con MMA &gt; 3.500 kg</option>
+          <option value="D">D · MMA ≤ 3.500 kg</option>
+        </select></div>
+      <div class="field"><label for="basis">Precio para calcular G</label>
+        <select id="basis">
+          <option value="auto">Automático según fecha del transporte</option>
+          <option value="pmed">Pmed (PVP sin IVA ni devolución gasóleo profesional)</option>
+          <option value="pai">Precio antes de impuestos (PAI)</option>
+          <option value="pvpsin">PVP sin IVA</option>
+          <option value="pvp">PVP en surtidor</option>
+        </select></div>
+      <div class="field"><label for="price">Precio pactado del transporte (€)</label><input type="number" id="price" min="0" step="0.01" inputmode="decimal"></div>
+      <div class="field"><label for="thr">Umbral de revisión (%)</label><input type="number" id="thr" min="0" step="0.1" inputmode="decimal"></div>
+      <div class="field"><label for="rnd">Redondeo de G (decimales del %)</label>
+        <select id="rnd">
+          <option value="none">Sin redondeo</option>
+          <option value="0">0 decimales (43 %)</option>
+          <option value="1">1 decimal (42,6 %)</option>
+          <option value="2">2 decimales (42,57 %)</option>
+          <option value="3">3 decimales (42,573 %)</option>
+          <option value="4">4 decimales (42,5731 %)</option>
+        </select></div>
+    </div>
+    <div class="fields" style="align-items:center">
+      <label class="check"><input type="checkbox" id="gp"> Vehículo de MMA ≥ 7,5 t (con devolución de gasóleo profesional)</label>
+      <label class="check"><input type="checkbox" id="cont"> Contrato de transporte continuado (revisión en cada facturación)</label>
+      <label class="check"><input type="checkbox" id="cMan"> Fijar C a mano</label>
+      <div class="field" style="flex:0 1 120px" id="cManBox" hidden><label for="cVal">Coeficiente C</label><input type="number" id="cVal" min="0" max="1" step="0.05"></div>
+    </div>
+    <p class="hint" id="basisHint"></p>
+  </section>
+
+  <section class="result" aria-live="polite" aria-labelledby="hRes">
+    <h2 id="hRes" class="eyebrow" style="color:inherit;opacity:.85">Resultado</h2>
+    <div class="row">
+      <div><div class="k">Variación del transporte</div><div class="v" id="rPct">—</div><div class="s">G × C</div></div>
+      <div><div class="k">Variación del gasóleo (G)</div><div class="v small" id="rG">—</div><div class="s" id="rGs"></div></div>
+      <div><div class="k">Coeficiente C</div><div class="v small" id="rC">—</div><div class="s" id="rCs"></div></div>
+      <div><div class="k">Importe a revisar (ΔP)</div><div class="v small" id="rDP">—</div><div class="s" id="rNP"></div></div>
+    </div>
+    <div class="verdict"><span class="pill" id="rVerdict">—</span><span class="formula" id="rFormula"></span></div>
+  </section>
+
+  <section class="chart" aria-labelledby="hChart">
+    <h3 id="hChart">Evolución del precio usado para G</h3>
+    <div class="legend"><span><i style="background:var(--accent)"></i><span id="lgSeries">Precio</span></span><span><i style="background:var(--band-a)"></i>Referencia</span><span><i style="background:var(--band-b)"></i>Realización</span></div>
+    <div class="svgbox"><svg id="svg" role="img" aria-label="Gráfica del precio semanal del gasóleo" width="100%" height="260"></svg></div>
+  </section>
+
+  <details>
+    <summary>Semanas utilizadas</summary>
+    <div class="tablebox"><table id="tbl"><thead><tr><th>Semana (lunes)</th><th>PVP</th><th>PVP sin IVA</th><th>Impuesto hidrocarburos</th><th>PAI</th><th>Devol. GP</th><th>Pmed ≥ 7,5 t</th><th>Pmed &lt; 7,5 t</th></tr></thead><tbody></tbody></table></div>
+  </details>
+
+  <details>
+    <summary>Cómo se calcula</summary>
+    <div class="notes">
+      <p class="mono">ΔP = G × P × C / 100 &nbsp;·&nbsp; G = (P<sub>cálculo</sub> − P<sub>referencia</sub>) / P<sub>referencia</sub> × 100</p>
+      <p>G se redondea al número de decimales elegido (redondeo aritmético: 5 o más sube) antes de multiplicarlo por C. Ese G redondeado es también el que se compara con el umbral.</p>
+      <ul>
+        <li><b>Fecha puntual:</b> se toma el precio de la primera fecha de la Excel igual o posterior al día indicado. <b>Mes:</b> media simple de las semanas cuya fecha en la Excel del Ministerio pertenece a ese mes.</li>
+        <li><b>Precio para G (automático):</b> transporte desde el 16/04/2026, Pmed (PVP sin IVA y, para MMA ≥ 7,5 t, sin la devolución del gasóleo profesional); del 22/03 al 15/04/2026, PAI; antes, PVP.</li>
+        <li><b>Coeficiente C:</b> desde el 01/07/2026 (RDL 18/2026) según el Pmed del transporte; del 16/04 al 30/06/2026 (RDL 9/2026) según el PAI; antes, coeficiente fijo por vehículo. Si el transporte se indica por mes, se usa la media de ese mes.</li>
+        <li>La revisión es obligatoria cuando |G| ≥ 5 % o el umbral menor pactado por escrito, y siempre en los contratos continuados en cada periodo de facturación. No pueden computarse las bonificaciones extraordinarias del gasóleo.</li>
+      </ul>
+      <div class="ctable">
+        <table><thead><tr><th colspan="2">RDL 18/2026 · Pmed (€/l)</th></tr></thead><tbody id="ct18"></tbody></table>
+        <table><thead><tr><th colspan="2">RDL 9/2026 · PAI (€/l)</th></tr></thead><tbody id="ct9"></tbody></table>
+      </div>
+      <p class="hint">Herramienta orientativa y gratuita. Para un litigio o una reclamación, contrasta el resultado con la <a href="https://apps.fomento.gob.es/preciogasoleo/angular_proyecto/client/gasoleoCambio" target="_blank" rel="noopener">calculadora oficial del Ministerio</a>.</p>
+    </div>
+  </details>
+  <footer class="foot">
+    <span>Una herramienta de <b>Grupo Trimodos</b> · Stinsa · Transargi</span>
+    <a href="https://www.grupotrimodos.com/" target="_blank" rel="noopener">grupotrimodos.com</a>
+  </footer>
+</div>
+
+<script>
+(async function(){
+"use strict";
+const MIN_URL="https://www.transportes.gob.es/transporte-terrestre/servicios-al-transportista/indice-de-variacion-semanal-de-los-precios-medios-del-gasoleo-en-espana";
+const $=id=>document.getElementById(id);
+const DAY=864e5, EPOCH=Date.UTC(1899,11,30);
+const serialToMs=s=>EPOCH+s*DAY;
+const isoToMs=s=>{if(!s)return NaN;const[y,m,d]=s.split("-").map(Number);return Date.UTC(y,m-1,d)};
+const msToIso=ms=>new Date(ms).toISOString().slice(0,10);
+const fmtDate=ms=>{const d=new Date(ms);return String(d.getUTCDate()).padStart(2,"0")+"/"+String(d.getUTCMonth()+1).padStart(2,"0")+"/"+d.getUTCFullYear()};
+const nf=(v,d)=>v==null||!isFinite(v)?"—":v.toLocaleString("es-ES",{minimumFractionDigits:d,maximumFractionDigits:d});
+const D_RDL18=isoToMs("2026-07-01"), D_RDL9=isoToMs("2026-04-16"), D_RDL7=isoToMs("2026-03-22");
+
+// Tablas del coeficiente C
+const T18={A:[[1.18,.3],[1.73,.4],[Infinity,.5]],B:[[1.28,.2],[2.13,.3],[Infinity,.4]],C:[[1.08,.2],[1.78,.3],[Infinity,.4]],D:[[1.08,.1],[2.33,.2],[Infinity,.3]]};
+const T9 ={A:[[0.85,.3],[1.40,.4],[Infinity,.5]],B:[[0.95,.2],[1.80,.3],[Infinity,.4]],C:[[0.75,.2],[1.45,.3],[Infinity,.4]],D:[[0.70,.1],[1.95,.2],[Infinity,.3]]};
+const FIXED={A:.3,B:.2,C:.2,D:.1};
+const pick=(t,v)=>{for(const[lim,c]of t)if(v<lim)return c;return t[t.length-1][1]};
+
+// ---- Datos ----
+let SEED;
+try{const r=await fetch("data.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error(r.status);SEED=await r.json()}
+catch(e){document.querySelector(".status .msg").textContent="No se pudieron cargar los precios ("+e.message+"). Recarga la página en unos segundos.";$("stPill").className="pill bad";$("stPill").textContent="Sin datos";return}
+let DATA={...SEED,origin:"Ministerio de Transportes"};
+let ROWS=[];
+function loadRows(){
+  ROWS=DATA.rows.map(r=>({ms:serialToMs(r[0]),pvp:r[1],pvpsin:r[2],ieh:r[3],pai:r[4],gp:r[5],pge:r[6]||null,plt:r[7]||null})).sort((a,b)=>a.ms-b.ms);
+}
+loadRows();
+const lastRow=()=>{for(let i=ROWS.length-1;i>=0;i--)if(ROWS[i].pvp!=null)return ROWS[i];return ROWS[ROWS.length-1]};
+
+function val(row,basis,ge75){
+  if(basis==="pvp")return row.pvp;
+  if(basis==="pai")return row.pai;
+  if(basis==="pvpsin")return row.pvpsin;
+  // pmed
+  let p=ge75?row.pge:row.plt;
+  if(p==null&&row.pvpsin!=null)p=row.pvpsin-(ge75?(row.gp||0):0);
+  return p;
+}
+function weeksFor(spec){
+  if(spec.mode==="date"){
+    const t=isoToMs(spec.date); if(!isFinite(t))return[];
+    const w=ROWS.find(r=>r.ms>=t)||null;
+    return w?[w]:[];
+  }
+  if(!/^\d{4}-\d{2}$/.test(spec.month||""))return[];
+  const[y,m]=spec.month.split("-").map(Number);
+  return ROWS.filter(r=>{const d=new Date(r.ms);return d.getUTCFullYear()===y&&d.getUTCMonth()+1===m});
+}
+function avg(weeks,basis,ge75){
+  const v=weeks.map(w=>val(w,basis,ge75)).filter(x=>x!=null&&isFinite(x));
+  return v.length?{v:v.reduce((s,x)=>s+x,0)/v.length,n:v.length}:{v:null,n:0};
+}
+function specEnd(spec){if(spec.mode==="date")return isoToMs(spec.date);if(!/^\d{4}-\d{2}$/.test(spec.month||""))return NaN;const[y,m]=spec.month.split("-").map(Number);return Date.UTC(y,m,0)}
+
+// ---- Estado de la interfaz ----
+const lastMs=lastRow().ms;
+const S={ref:{mode:"date",date:"2026-01-15",month:"2025-12"},
+         real:{mode:"month",date:msToIso(lastMs),month:msToIso(lastMs).slice(0,7)},
+         veh:"A",basis:"auto",price:1000,thr:5,rnd:"2",gp:true,cont:false,cMan:false,cVal:0.4};
+try{const s=JSON.parse(localStorage.getItem("gasoleo-calc")||"null");if(s){for(const k of["ref","real"])if(s[k]){if(s[k].mode!=="date")s[k].mode="month";if(!s[k].month)s[k].month=S[k].month;s[k]={mode:s[k].mode,date:s[k].date||S[k].date,month:s[k].month}}Object.assign(S,s)}}catch(e){}
+function save(){try{localStorage.setItem("gasoleo-calc",JSON.stringify(S))}catch(e){}}
+
+function bindPanel(key,panelId,prefix){
+  const p=$(panelId);
+  p.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>{S[key].mode=b.dataset.mode;sync();calc()}));
+  ["Date","Month"].forEach(k=>{const el=$(prefix+k);el.addEventListener("change",()=>{S[key][k.toLowerCase()]=el.value;calc()})});
+}
+bindPanel("ref","pRef","ref"); bindPanel("real","pReal","real");
+$("veh").addEventListener("change",e=>{S.veh=e.target.value;if(S.veh==="A")S.gp=true;if(S.veh==="D")S.gp=false;sync();calc()});
+$("basis").addEventListener("change",e=>{S.basis=e.target.value;calc()});
+$("price").addEventListener("input",e=>{S.price=parseFloat(e.target.value);calc()});
+$("thr").addEventListener("input",e=>{S.thr=parseFloat(e.target.value);calc()});
+$("rnd").addEventListener("change",e=>{S.rnd=e.target.value;calc()});
+$("gp").addEventListener("change",e=>{S.gp=e.target.checked;calc()});
+$("cont").addEventListener("change",e=>{S.cont=e.target.checked;calc()});
+$("cMan").addEventListener("change",e=>{S.cMan=e.target.checked;sync();calc()});
+$("cVal").addEventListener("input",e=>{S.cVal=parseFloat(e.target.value);calc()});
+
+function sync(){
+  for(const[key,pid,pre]of[["ref","pRef","ref"],["real","pReal","real"]]){
+    const p=$(pid),m=S[key].mode;
+    p.querySelectorAll(".seg button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.mode===m)));
+    p.querySelectorAll("[data-for]").forEach(f=>f.hidden=f.dataset.for!==m);
+    $(pre+"Date").value=S[key].date||"";$(pre+"Month").value=S[key].month||"";
+  }
+  $("veh").value=S.veh;$("basis").value=S.basis;$("price").value=isFinite(S.price)?S.price:"";$("thr").value=isFinite(S.thr)?S.thr:"";$("rnd").value=S.rnd;
+  $("gp").checked=S.gp;$("gp").disabled=S.veh==="A"||S.veh==="D";$("cont").checked=S.cont;
+  $("cMan").checked=S.cMan;$("cManBox").hidden=!S.cMan;$("cVal").value=S.cVal;
+}
+
+const BASIS_NAME={pmed:"Pmed",pai:"PAI",pvpsin:"PVP sin IVA",pvp:"PVP"};
+const MESES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+function weeksText(ws,spec){
+  if(!ws.length)return spec.mode==="month"?"El Ministerio no tiene precios publicados para ese mes.":"El Ministerio aún no ha publicado ningún precio en esa fecha o después.";
+  if(spec.mode==="date")return "Precio del "+fmtDate(ws[0].ms)+" (primera fecha publicada igual o posterior)";
+  const d=new Date(ws[0].ms),mes=MESES[d.getUTCMonth()]+" de "+d.getUTCFullYear();
+  return "Media de "+ws.length+(ws.length===1?" semana":" semanas")+" de "+mes+": "+ws.map(w=>fmtDate(w.ms).slice(0,5)).join(", ");
+}
+
+let LAST={};
+function calc(){
+  save();
+  const ge=S.gp;
+  const tEnd=specEnd(S.real);
+  let basis=S.basis;
+  if(basis==="auto")basis=!isFinite(tEnd)?"pmed":tEnd>=D_RDL9?"pmed":tEnd>=D_RDL7?"pai":"pvp";
+  const wr=weeksFor(S.ref),wt=weeksFor(S.real);
+  const r=avg(wr,basis,ge),t=avg(wt,basis,ge);
+  $("refVal").textContent=nf(r.v,5);$("realVal").textContent=nf(t.v,5);
+  $("refWeeks").textContent=weeksText(wr,S.ref);$("realWeeks").textContent=weeksText(wt,S.real);
+  const lastData=lastRow().ms;
+  if(S.real.mode==="month"&&isFinite(tEnd)&&tEnd>lastData+6*DAY&&wt.length)$("realWeeks").textContent+=" · El mes aún no está completo en la Excel.";
+
+  // C
+  let C=null,cNote="";
+  if(S.cMan){C=S.cVal;cNote="Fijado a mano";}
+  else if(isFinite(tEnd)&&tEnd>=D_RDL18){const pm=avg(wt,"pmed",ge).v;if(pm!=null){C=pick(T18[S.veh],pm);cNote="RDL 18/2026 · Pmed "+nf(pm,3)+" €/l"}}
+  else if(isFinite(tEnd)&&tEnd>=D_RDL9){const pa=avg(wt,"pai",ge).v;if(pa!=null){C=pick(T9[S.veh],pa);cNote="RDL 9/2026 · PAI "+nf(pa,3)+" €/l"}}
+  else if(isFinite(tEnd)){C=FIXED[S.veh];cNote="Coeficiente fijo anterior · verifícalo"}
+
+  const G0=(r.v&&t.v!=null)?(t.v-r.v)/r.v*100:null;
+  const nd=S.rnd==="none"?null:parseInt(S.rnd,10);
+  const roundHalfUp=(x,n)=>{const f=Math.pow(10,n);return Math.sign(x)*Math.round(Math.abs(x)*f+1e-9)/f};
+  const G=G0==null?null:(nd==null?G0:roundHalfUp(G0,nd));
+  const gd=nd==null?4:nd;
+  const pct=(G!=null&&C!=null)?G*C:null;
+  const dP=(pct!=null&&isFinite(S.price))?S.price*pct/100:null;
+  $("rG").textContent=G==null?"—":(G>0?"+":"")+nf(G,gd)+" %";
+  $("rGs").textContent=BASIS_NAME[basis]+(basis==="pmed"?(ge?" · MMA ≥ 7,5 t":" · MMA < 7,5 t"):"");
+  $("rC").textContent=C==null?"—":nf(C,2);$("rCs").textContent=cNote;
+  $("rPct").textContent=pct==null?"—":(pct>0?"+":"")+nf(pct,2)+" %";
+  $("rDP").textContent=dP==null?"—":(dP>0?"+":"")+nf(dP,2)+" €";
+  $("rNP").textContent=dP==null?"":"Nuevo precio: "+nf(S.price+dP,2)+" €";
+  $("rFormula").textContent=(G!=null&&C!=null)?((nd==null?"Sin redondear (G = "+nf(G0,6)+" %) · ":"G sin redondear "+nf(G0,6)+" % · ")+"ΔP = "+nf(G,gd)+" × "+(isFinite(S.price)?nf(S.price,2):"P")+" × "+nf(C,2)+" / 100"):"";
+  const v=$("rVerdict"),thr=isFinite(S.thr)?S.thr:5;
+  if(G==null){v.className="pill info";v.textContent="Faltan datos para calcular"}
+  else if(S.cont){v.className="pill ok";v.textContent="Revisión obligatoria: contrato continuado"}
+  else if(Math.abs(G)>=thr){v.className="pill ok";v.textContent="Revisión obligatoria: |G| ≥ "+nf(thr,1)+" %"}
+  else{v.className="pill warn";v.textContent="Por debajo del umbral del "+nf(thr,1)+" %: no es obligatoria"}
+  $("basisHint").textContent=S.basis==="auto"?("Precio usado para G: "+BASIS_NAME[basis]+", según la fecha de realización del transporte."):"Precio para G elegido a mano: "+BASIS_NAME[basis]+".";
+  $("lgSeries").textContent=BASIS_NAME[basis]+" semanal (€/l)";
+  LAST={basis,ge,wr,wt};
+  drawChart();drawTable();
+}
+
+// ---- Gráfica ----
+function drawChart(){
+  const svg=$("svg");const{basis,ge,wr,wt}=LAST;
+  const W=Math.max(560,svg.clientWidth||900),H=260,m={l:52,r:14,t:12,b:28};
+  svg.setAttribute("viewBox","0 0 "+W+" "+H);svg.setAttribute("width",W);
+  const all=[...wr,...wt].map(w=>w.ms);
+  let a=all.length?Math.min(...all):lastRow().ms-365*DAY,b=all.length?Math.max(...all):lastRow().ms;
+  const pad=Math.max(28*DAY,(b-a)*0.15);a-=pad;b=Math.min(b+pad,lastRow().ms+7*DAY);if(b-a<60*DAY)a=b-60*DAY;
+  const pts=ROWS.filter(r=>r.ms>=a&&r.ms<=b).map(r=>({ms:r.ms,v:val(r,basis,ge)})).filter(p=>p.v!=null);
+  if(pts.length<2){svg.innerHTML="";return}
+  let lo=Math.min(...pts.map(p=>p.v)),hi=Math.max(...pts.map(p=>p.v));const sp=(hi-lo)||0.1;lo-=sp*.1;hi+=sp*.1;
+  const x=ms=>m.l+(ms-a)/(b-a)*(W-m.l-m.r),y=v=>m.t+(hi-v)/(hi-lo)*(H-m.t-m.b);
+  let h="";
+  const band=(ws,cls)=>{if(!ws.length)return"";const x0=x(ws[0].ms),x1=x(ws[ws.length-1].ms+7*DAY);return `<rect x="${Math.max(m.l,x0)}" y="${m.t}" width="${Math.max(3,Math.min(W-m.r,x1)-Math.max(m.l,x0))}" height="${H-m.t-m.b}" fill="${cls}"/>`};
+  h+=band(wr,"var(--band-a)")+band(wt,"var(--band-b)");
+  const step=(hi-lo)/4;
+  for(let i=0;i<=4;i++){const v=lo+step*i,yy=y(v);h+=`<line x1="${m.l}" x2="${W-m.r}" y1="${yy}" y2="${yy}" stroke="var(--line)" stroke-width="1"/><text x="${m.l-6}" y="${yy+4}" text-anchor="end">${nf(v,3)}</text>`}
+  const span=b-a,months=span/(30*DAY),every=months>36?12:months>14?3:months>6?2:1;
+  const d0=new Date(a);let cur=Date.UTC(d0.getUTCFullYear(),d0.getUTCMonth()+1,1);
+  const MES=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+  while(cur<b){const d=new Date(cur);if(d.getUTCMonth()%every===0){const xx=x(cur);h+=`<line x1="${xx}" x2="${xx}" y1="${H-m.b}" y2="${H-m.b+4}" stroke="var(--muted)"/><text x="${xx}" y="${H-8}" text-anchor="middle">${MES[d.getUTCMonth()]} ${String(d.getUTCFullYear()).slice(2)}</text>`}cur=Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,1)}
+  const path=pts.map((p,i)=>(i?"L":"M")+x(p.ms).toFixed(1)+" "+y(p.v).toFixed(1)).join(" ");
+  h+=`<path d="${path} L${x(pts[pts.length-1].ms).toFixed(1)} ${H-m.b} L${x(pts[0].ms).toFixed(1)} ${H-m.b} Z" fill="var(--accent)" opacity=".08"/>`;
+  h+=`<path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2"/>`;
+  const e=pts[pts.length-1];h+=`<circle cx="${x(e.ms)}" cy="${y(e.v)}" r="4" fill="var(--accent)"/>`;
+  svg.innerHTML=h;
+}
+window.addEventListener("resize",()=>drawChart());
+
+function drawTable(){
+  const{wr,wt}=LAST;const set=new Map();
+  wr.forEach(w=>set.set(w.ms,"in-ref"));wt.forEach(w=>set.set(w.ms,set.has(w.ms)?"in-ref":"in-real"));
+  const rows=[...set.keys()].sort((a,b)=>a-b).map(ms=>ROWS.find(r=>r.ms===ms));
+  $("tbl").querySelector("tbody").innerHTML=rows.map(r=>`<tr class="${set.get(r.ms)}"><td>${fmtDate(r.ms)}</td><td>${nf(r.pvp,5)}</td><td>${nf(r.pvpsin,5)}</td><td>${nf(r.ieh,5)}</td><td>${nf(r.pai,5)}</td><td>${nf(r.gp,3)}</td><td>${nf(r.pge,5)}</td><td>${nf(r.plt,5)}</td></tr>`).join("");
+}
+function drawCTables(){
+  const names={A:"A · ≥ 20 t",B:"B · 3,5–20 t",C:"C · Obras",D:"D · ≤ 3,5 t"};
+  const fmt=t=>t.map(([lim,c],i)=>{const prev=i?t[i-1][0]:null;return (prev==null?"< "+nf(lim,2):lim===Infinity?"≥ "+nf(prev,2):nf(prev,2)+"–"+nf(lim,2))+" → "+nf(c,1)}).join(" · ");
+  $("ct18").innerHTML=Object.keys(names).map(k=>`<tr><td>${names[k]}</td><td class="mono">${fmt(T18[k])}</td></tr>`).join("");
+  $("ct9").innerHTML=Object.keys(names).map(k=>`<tr><td>${names[k]}</td><td class="mono">${fmt(T9[k])}</td></tr>`).join("");
+}
+
+// ---- Estado de los datos ----
+const fileDateMs=()=>isoToMs(DATA.fileDate);
+function renderStatus(){
+  $("stFile").textContent=fmtDate(fileDateMs());
+  $("stLast").textContent=fmtDate(lastRow().ms);
+  $("stOrigin").textContent=DATA.checkedAt?("Actualizado el "+new Date(DATA.checkedAt).toLocaleString("es-ES",{dateStyle:"short",timeStyle:"short"})):"Ministerio de Transportes";
+  const p=$("stPill"),msg=$("stMsg");
+  if(Date.now()>lastRow().ms+10*DAY){p.className="pill warn";p.textContent="Revisa si hay datos nuevos";
+    msg.innerHTML="Los precios se actualizan solos cada semana, pero la última semana con precio es del "+fmtDate(lastRow().ms)+". Puede que el Ministerio aún no haya publicado la siguiente; compruébalo en la página oficial.";}
+  else{p.className="pill ok";p.textContent="Datos al día";msg.textContent="Los precios se actualizan automáticamente cada semana desde la Excel del Ministerio.";}
+}
+sync();drawCTables();renderStatus();calc();
+})();
+</script>
+</body>
+</html>
