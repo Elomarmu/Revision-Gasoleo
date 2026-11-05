@@ -1,8 +1,8 @@
 // Service worker de la calculadora: permite instalarla como app y usarla sin conexión.
 // - data.json: primero la red (precios al día); sin conexión, la última copia guardada.
-// - Resto de ficheros propios y tipografías: se sirve la copia guardada y se actualiza por detrás,
-//   así una versión nueva de la página llega en la siguiente apertura.
-const VERSION = "gasoleo-v2";
+// - La página: primero la red (así se ve siempre la última versión); sin conexión, la copia guardada.
+// - Imágenes, manifiesto y tipografías: se sirve la copia guardada y se actualiza por detrás.
+const VERSION = "gasoleo-v3";
 const BASICOS = [
   "./", "index.html", "data.json", "manifest.webmanifest",
   "img/trimodos.png", "img/stinsa.png", "img/transargi.png",
@@ -44,8 +44,20 @@ self.addEventListener("fetch", (e) => {
   const fuentes = url.host === "fonts.googleapis.com" || url.host === "fonts.gstatic.com";
   if (!propio && !fuentes) return;
 
-  // Navegación: la página guardada aunque la URL lleve ?lang=en
-  const clave = req.mode === "navigate" ? new Request(new URL("./", self.registration.scope)) : req;
+  // La página: primero la red, para ver siempre la última versión; sin conexión, la copia guardada
+  // (la misma aunque la URL lleve ?lang=en)
+  if (req.mode === "navigate") {
+    const pagina = new Request(new URL("./", self.registration.scope));
+    e.respondWith(
+      fetch(req, { cache: "no-cache" })
+        .then((r) => { if (r.ok) { const copia = r.clone(); caches.open(VERSION).then((c) => c.put(pagina, copia)); } return r; })
+        .catch(() => caches.match(pagina))
+    );
+    return;
+  }
+
+  // Imágenes, manifiesto y tipografías: copia guardada y actualización por detrás
+  const clave = req;
   e.respondWith(
     caches.open(VERSION).then((c) =>
       c.match(clave).then((guardada) => {
