@@ -41,6 +41,7 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap>*{min-width:0}
 .wrap{max-width:1080px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:18px}
 h1,h2,h3{font-family:var(--f-display);font-weight:700;letter-spacing:-.005em;text-wrap:balance;margin:0}
 h1{font-size:clamp(26px,4vw,36px);line-height:1.12;font-weight:800}
@@ -92,12 +93,13 @@ button:disabled{opacity:.55;cursor:default}
 /* Paneles de precio */
 .pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:12px;min-width:0}
-.panel header{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
-.panel .tag{justify-self:start;font-family:var(--f-display);font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:4px}
+.panel header{display:grid;gap:8px}
+.panel .ph-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.panel .tag{display:inline-flex;align-items:center;height:26px;font-family:var(--f-display);font-weight:700;font-size:13px;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:4px}
 .tag.ref{background:var(--band-a);color:var(--accent)}
 .tag.real{background:var(--band-b);color:var(--amber)}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
-.seg button{border:0;border-radius:0;padding:6px 12px;background:transparent;font-weight:500}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;height:26px;flex:none}
+.seg button{border:0;border-radius:0;padding:0 12px;height:100%;background:transparent;font-weight:600;font-size:13px;line-height:1}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .fields{display:flex;flex-wrap:wrap;gap:10px}
 .field{display:grid;gap:4px;flex:1 1 140px;min-width:0}
@@ -127,6 +129,11 @@ input[type=number]{font-family:var(--f-mono)}
 :root[data-theme="dark"] .result .verdict{border-top-color:rgba(0,0,0,.25)}
 .result .verdict .pill{background:var(--surface)}
 .result .k{color:var(--sun);opacity:1}
+.result .share{margin-left:auto;background:var(--sun);color:#1d1d1b;border:0;padding:9px 16px;font-weight:700}
+.result .share:hover{filter:brightness(1.05)}
+.share-msg{font-size:13px;opacity:.85;margin:0}
+.share-msg:empty{display:none}
+@media (max-width:520px){.result .share{margin-left:0;width:100%;justify-content:center}}
 .result .formula{font-family:var(--f-mono);font-size:13px;opacity:.9}
 
 /* Gráfica */
@@ -140,7 +147,8 @@ svg text{fill:var(--muted);font-family:var(--f-mono);font-size:11px}
 details{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 16px}
 details summary{cursor:pointer;font-family:var(--f-display);font-weight:700;font-size:18px}
 details[open] summary{margin-bottom:10px}
-.tablebox{overflow-x:auto}
+.tablebox{overflow:auto;max-height:min(420px,60vh);-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-radius:8px}
+.tablebox thead th{position:sticky;top:0;background:var(--surface);z-index:1}
 table{border-collapse:collapse;width:100%;font-size:13px}
 th,td{text-align:right;padding:5px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
 th:first-child,td:first-child{text-align:left}
@@ -150,7 +158,9 @@ tr.in-ref td{background:var(--band-a)}
 tr.in-real td{background:var(--band-b)}
 .notes{display:grid;gap:8px;font-size:14px;max-width:80ch}
 .notes ul{margin:0;padding-left:20px;display:grid;gap:6px}
-.ctable{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.ctable{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:12px}
+.ctable table td{white-space:normal}
+.notes{min-width:0;overflow-wrap:anywhere}
 .ctable table td,.ctable table th{text-align:left}
 .drop{border:2px dashed var(--line);border-radius:var(--r);padding:16px;display:grid;gap:8px;justify-items:start}
 .drop.over{border-color:var(--accent);background:var(--band-a)}
@@ -197,10 +207,11 @@ tr.in-real td{background:var(--band-b)}
   <div class="pair">
     <section class="panel" id="pRef" aria-labelledby="hRef">
       <header>
-        <div style="display:grid;gap:4px"><span class="tag ref">Referencia</span><h2 id="hRef">Fecha del contrato</h2></div>
-        <div class="seg" role="group" aria-label="Modo de la referencia">
-          <button type="button" data-mode="date">Fecha</button><button type="button" data-mode="month">Mes</button>
+        <div class="ph-top">
+          <span class="tag ref">Referencia</span>
+          <div class="seg" role="group" aria-label="Modo de la referencia"><button type="button" data-mode="date">Fecha</button><button type="button" data-mode="month">Mes</button></div>
         </div>
+        <h2 id="hRef">Fecha del contrato</h2>
       </header>
       <div class="fields">
         <div class="field" data-for="date"><label for="refDate">Fecha</label><input type="date" id="refDate"></div>
@@ -211,10 +222,11 @@ tr.in-real td{background:var(--band-b)}
 
     <section class="panel" id="pReal" aria-labelledby="hReal">
       <header>
-        <div style="display:grid;gap:4px"><span class="tag real">Cálculo</span><h2 id="hReal">Realización del transporte</h2></div>
-        <div class="seg" role="group" aria-label="Modo del cálculo">
-          <button type="button" data-mode="date">Fecha</button><button type="button" data-mode="month">Mes</button>
+        <div class="ph-top">
+          <span class="tag real">Cálculo</span>
+          <div class="seg" role="group" aria-label="Modo del cálculo"><button type="button" data-mode="date">Fecha</button><button type="button" data-mode="month">Mes</button></div>
         </div>
+        <h2 id="hReal">Realización del transporte</h2>
       </header>
       <div class="fields">
         <div class="field" data-for="date"><label for="realDate">Fecha</label><input type="date" id="realDate"></div>
@@ -271,7 +283,8 @@ tr.in-real td{background:var(--band-b)}
       <div><div class="k">Coeficiente C</div><div class="v small" id="rC">—</div><div class="s" id="rCs"></div></div>
       <div><div class="k">Importe a revisar (ΔP)</div><div class="v small" id="rDP">—</div><div class="s" id="rNP"></div></div>
     </div>
-    <div class="verdict"><span class="pill" id="rVerdict">—</span><span class="formula" id="rFormula"></span></div>
+    <div class="verdict"><span class="pill" id="rVerdict">—</span><span class="formula" id="rFormula"></span><button type="button" id="btnShare" class="share">Compartir resultado</button></div>
+    <p class="share-msg" id="shareMsg" aria-live="polite"></p>
   </section>
 
   <section class="chart" aria-labelledby="hChart">
@@ -452,7 +465,7 @@ function calc(){
   else{v.className="pill warn";v.textContent="Por debajo del umbral del "+nf(thr,1)+" %: no es obligatoria"}
   $("basisHint").textContent=S.basis==="auto"?("Precio usado para G: "+BASIS_NAME[basis]+", según la fecha de realización del transporte."):"Precio para G elegido a mano: "+BASIS_NAME[basis]+".";
   $("lgSeries").textContent=BASIS_NAME[basis]+" semanal (€/l)";
-  LAST={basis,ge,wr,wt};
+  LAST={basis,ge,wr,wt,rv:r.v,tv:t.v,G,gd,C,cNote,pct,verdict:$("rVerdict").textContent,verdictOk:$("rVerdict").className.includes("ok")};
   drawChart();drawTable();
 }
 
@@ -512,6 +525,102 @@ function renderStatus(){
   else{p.className="pill ok";p.textContent="Actualización automática";msg.textContent="Los precios se cargan solos desde la Excel del Ministerio, que se publica una vez por semana.";}
 }
 sync();drawCTables();renderStatus();calc();
+
+// ---- Compartir el resultado como imagen ----
+function specLabel(spec){
+  if(spec.mode==="date")return fmtDate(isoToMs(spec.date));
+  if(!/^\d{4}-\d{2}$/.test(spec.month||""))return "—";
+  const[y,m]=spec.month.split("-").map(Number);return MESES[m-1].charAt(0).toUpperCase()+MESES[m-1].slice(1)+" "+y;
+}
+function specDetail(ws,spec){
+  if(!ws.length)return "Sin precio publicado";
+  if(spec.mode==="date")return "Precio publicado el "+fmtDate(ws[0].ms);
+  return "Media de "+ws.length+(ws.length===1?" semana":" semanas");
+}
+function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+function fitText(ctx,txt,maxW,size,weight,family){let s=size;do{ctx.font=`${weight} ${s}px ${family}`;s-=2}while(ctx.measureText(txt).width>maxW&&s>12);return txt}
+async function imagenResultado(){
+  await document.fonts.ready;
+  const W=1080,H=1350,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");
+  const DISP='Raleway, "Segoe UI", sans-serif',BODY='Mulish, "Segoe UI", sans-serif',MONO='"IBM Plex Mono", Menlo, monospace';
+  const INK="#1d1d1b",MUT="#5f625c",GREEN="#00857a",ORANGE="#c4592a",SUN="#fcda00";
+  x.fillStyle="#f5f6f4";x.fillRect(0,0,W,H);
+  // Banda de marca
+  x.fillStyle="#fff";x.fillRect(0,0,W,180);
+  const imgs=[...document.querySelectorAll(".brand img")].filter(i=>i.complete&&i.naturalWidth);
+  const draw=(im,h,xx,yy)=>{const w=im.naturalWidth*h/im.naturalHeight;x.drawImage(im,xx,yy,w,h);return w};
+  const gt=imgs.find(i=>/trimodos/i.test(i.src)),st=imgs.find(i=>/stinsa/i.test(i.src)),tr=imgs.find(i=>/transargi/i.test(i.src));
+  if(gt)draw(gt,84,60,48);else{x.fillStyle=INK;x.font=`800 40px ${DISP}`;x.fillText("GRUPO TRIMODOS",60,105)}
+  let rx=W-60;
+  if(tr){const w=tr.naturalWidth*54/tr.naturalHeight;rx-=w;draw(tr,54,rx,63)}
+  if(st){x.fillStyle="#dcdfd8";x.fillRect(rx-26,62,2,56);const w=st.naturalWidth*54/st.naturalHeight;rx-=w+52;draw(st,54,rx,63)}
+  [[SUN,0],["#009f92",1],["#f17e49",2]].forEach(([col,i])=>{x.fillStyle=col;x.fillRect(i*W/3,180,W/3+1,12)});
+  // Título
+  x.fillStyle=INK;x.font=`800 54px ${DISP}`;x.fillText("Revisión del precio del",60,290);x.fillText("transporte por gasóleo",60,354);
+  const veh=$("veh").options[$("veh").selectedIndex].text.replace(" · "," · Vehículo ");
+  x.fillStyle=MUT;fitText(x,veh,W-120,28,600,BODY);x.fillText(veh,60,410);
+  const bas=BASIS_NAME[LAST.basis]+(LAST.basis==="pmed"?(LAST.ge?" (MMA ≥ 7,5 t)":" (MMA < 7,5 t)"):"");
+  x.font=`500 26px ${BODY}`;x.fillText("Precio del gasóleo usado: "+bas+" · €/litro",60,450);
+  // Tarjetas de precio
+  const card=(cx,tag,tagCol,tagBg,label,val,detail)=>{
+    const y=490,w=465,h=270;
+    x.fillStyle="#fff";roundRect(x,cx,y,w,h,22);x.fill();x.strokeStyle="#dcdfd8";x.lineWidth=2;x.stroke();
+    x.font=`800 22px ${DISP}`;const tw=x.measureText(tag).width;
+    x.fillStyle=tagBg;roundRect(x,cx+30,y+30,tw+28,40,8);x.fill();x.fillStyle=tagCol;x.fillText(tag,cx+44,y+58);
+    x.fillStyle=INK;fitText(x,label,w-60,34,800,DISP);x.fillText(label,cx+30,y+122);
+    x.font=`500 60px ${MONO}`;x.fillText(val,cx+30,y+200);const vw=x.measureText(val).width;
+    x.fillStyle=MUT;x.font=`500 24px ${BODY}`;x.fillText("€/litro",cx+40+vw,y+200);
+    x.fillStyle=MUT;x.font=`500 24px ${BODY}`;x.fillText(detail,cx+30,y+242);
+  };
+  card(60,"REFERENCIA · CONTRATO",GREEN,"rgba(0,159,146,.16)",specLabel(S.ref),nf(LAST.rv,5),specDetail(LAST.wr,S.ref));
+  card(555,"CÁLCULO · TRANSPORTE",ORANGE,"rgba(241,126,73,.22)",specLabel(S.real),nf(LAST.tv,5),specDetail(LAST.wt,S.real));
+  // Resultado
+  const ry=800,rh=380;
+  x.fillStyle=INK;roundRect(x,60,ry,W-120,rh,26);x.fill();
+  x.save();roundRect(x,60,ry,W-120,rh,26);x.clip();x.fillStyle=SUN;x.fillRect(60,ry,W-120,12);x.restore();
+  x.fillStyle=SUN;x.font=`800 26px ${DISP}`;x.fillText("VARIACIÓN DEL PRECIO DEL TRANSPORTE",100,ry+72);
+  const sg=v=>v==null?"—":(v>0?"+":"")+nf(v,2);
+  x.fillStyle="#fff";x.font=`800 124px ${DISP}`;x.fillText(LAST.pct==null?"—":sg(LAST.pct)+" %",96,ry+196);
+  x.fillStyle="rgba(255,255,255,.22)";x.fillRect(100,ry+232,W-200,2);
+  x.fillStyle=SUN;x.font=`800 24px ${DISP}`;x.fillText("VARIACIÓN DEL GASÓLEO (G)",100,ry+282);x.fillText("COEFICIENTE C",620,ry+282);
+  x.fillStyle="#fff";x.font=`800 72px ${DISP}`;x.fillText(LAST.G==null?"—":(LAST.G>0?"+":"")+nf(LAST.G,LAST.gd)+" %",96,ry+354);x.fillText(LAST.C==null?"—":nf(LAST.C,2),616,ry+354);
+  // Pie
+  x.fillStyle=LAST.verdictOk?GREEN:ORANGE;x.font=`800 28px ${BODY}`;x.fillText(LAST.verdict,60,1232);
+  x.fillStyle=MUT;const pie="Precios: Ministerio de Transportes (Excel del "+fmtDate(fileDateMs())+") · Ley 15/2009, art. 38 · Cálculo orientativo";
+  fitText(x,pie,W-120,22,500,BODY);x.fillText(pie,60,1274);
+  x.fillStyle=GREEN;x.font=`700 24px ${BODY}`;x.fillText((location.host+location.pathname).replace(/\/$/,""),60,1312);
+  return await new Promise(res=>c.toBlob(res,"image/png"));
+}
+function textoResultado(){
+  const sg=v=>(v>0?"+":"")+nf(v,2);
+  return `Revisión del precio del transporte por gasóleo
+Referencia (${specLabel(S.ref)}): ${nf(LAST.rv,5)} €/l
+Cálculo (${specLabel(S.real)}): ${nf(LAST.tv,5)} €/l
+Variación del gasóleo (G): ${(LAST.G>0?"+":"")+nf(LAST.G,LAST.gd)} %
+Coeficiente C: ${nf(LAST.C,2)}
+Variación del transporte: ${sg(LAST.pct)} %
+${location.href.split("#")[0]}`;
+}
+$("btnShare").addEventListener("click",async()=>{
+  const btn=$("btnShare"),msg=$("shareMsg");msg.textContent="";
+  if(LAST.pct==null){msg.textContent="Completa las fechas para tener un resultado que compartir.";return}
+  btn.disabled=true;btn.textContent="Preparando…";
+  try{
+    const blob=await imagenResultado();
+    const file=new File([blob],"revision-gasoleo.png",{type:"image/png"});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file],title:"Revisión del precio por gasóleo",text:textoResultado()});}
+      catch(e){if(e&&e.name!=="AbortError")throw e}
+    }else{
+      const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="revision-gasoleo.png";document.body.appendChild(a);a.click();a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+      try{await navigator.clipboard.writeText(textoResultado());msg.textContent="Imagen descargada y resumen copiado. Adjunta la imagen en WhatsApp.";}
+      catch(e){msg.textContent="Imagen descargada. Adjúntala en WhatsApp.";}
+    }
+  }catch(e){msg.textContent="No se pudo preparar la imagen ("+(e.message||e)+").";}
+  finally{btn.disabled=false;btn.textContent="Compartir resultado"}
+});
+
 })();
 </script>
 </body>
