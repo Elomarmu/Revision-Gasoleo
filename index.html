@@ -65,8 +65,18 @@ h3{font-size:17px}
 .brand .tools{display:flex;align-items:center;gap:8px}
 .info-btn{width:28px;height:28px;padding:0;border-radius:50%;border:1.5px solid #1d1d1b;background:#fff;color:#1d1d1b;font:700 15px/1 Georgia,"Times New Roman",serif;font-style:italic;justify-content:center}
 .info-btn[aria-expanded="true"]{background:#1d1d1b;color:#fff}
-.info-pop{position:absolute;z-index:30;top:calc(100% - 4px);right:max(16px,env(safe-area-inset-right,0px));width:min(380px,calc(100vw - 32px));background:#1d1d1b;color:#fff;border-radius:12px;padding:14px 16px;font-size:14px;line-height:1.55;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.info-pop{position:absolute;z-index:30;top:calc(100% - 4px);right:max(16px,env(safe-area-inset-right,0px));width:min(520px,calc(100vw - 32px));max-height:min(72vh,640px);overflow:auto;overscroll-behavior:contain;background:#1d1d1b;color:#fff;border-radius:12px;padding:14px 16px;font-size:14px;line-height:1.55;box-shadow:0 10px 30px rgba(0,0,0,.25)}
 @media (min-width:521px){.brand .units{margin-left:auto}}
+.info-pop .pop-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}
+.info-pop h2{font-size:18px;color:#fff}
+.info-pop .pop-close{width:30px;height:30px;padding:0;justify-content:center;border-radius:50%;border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:20px;line-height:1}
+.info-pop .notes{color:#e8e8e3;max-width:none}
+.info-pop .notes .mono{color:#fff}
+.info-pop a{color:#fcda00}
+.info-pop .aviso{color:#c9cac4;border-top-color:rgba(255,255,255,.18)}
+.info-pop .aviso b{color:#fff}
+.info-pop table th{color:#c9cac4}
+.info-pop th,.info-pop td{border-bottom-color:rgba(255,255,255,.14)}
 .info-pop::before{content:"";position:absolute;top:-7px;right:92px;width:14px;height:14px;background:#1d1d1b;transform:rotate(45deg);border-radius:2px}
 .brand .lang{display:inline-flex;border:1px solid #dcdfd8;border-radius:6px;overflow:hidden;height:28px}
 .brand .lang button{border:0;border-radius:0;background:#fff;color:#1d1d1b;font:700 13px/1 var(--f-body);padding:0 11px;height:100%;cursor:pointer}
@@ -88,6 +98,8 @@ header.top .lede{color:var(--muted);max-width:62ch}
 .fact b{font-family:var(--f-mono);font-weight:500}
 #stOrigin{font-family:var(--f-body);font-weight:600}
 #btnShareApp svg{flex:none}
+.icon-btn{width:40px;height:40px;padding:0;justify-content:center}
+.icon-btn svg{width:20px;height:20px}
 .fact span{font-size:12px;color:var(--muted)}
 .aviso{display:grid;gap:8px;font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;margin-top:4px}
 .aviso b{color:var(--ink)}
@@ -201,20 +213,38 @@ tr.in-real td{background:var(--band-b)}
       <a href="https://www.grupotrimodos.com/transargi" target="_blank" rel="noopener" aria-label="TRANSARGI"><img src="img/transargi.png" alt="Transargi" width="131" height="30" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'alt',textContent:'TRANSARGI'}))"></a>
     </div>
     <div class="tools">
-      <button type="button" class="info-btn" id="btnInfo" aria-expanded="false" aria-controls="infoPop" aria-label="Qué calcula esta herramienta" title="Qué calcula esta herramienta">i</button>
+      <button type="button" class="info-btn" id="btnInfo" aria-expanded="false" aria-controls="infoPop" aria-label="Cómo se calcula" title="Cómo se calcula">i</button>
       <div class="lang" role="group" aria-label="Idioma / Language">
         <button type="button" data-lang="es" aria-pressed="true" title="Español (España)">ES</button><button type="button" data-lang="en" aria-pressed="false" title="English (UK)">EN</button>
       </div>
     </div>
-    <div class="info-pop" id="infoPop" role="dialog" aria-labelledby="btnInfo" hidden>
-      <p>Calcula la variación del gasóleo (G), el coeficiente C y el porcentaje que debe subir o bajar el precio pactado, con los precios semanales que publica el Ministerio de Transportes. Cada precio puede ser el de una fecha o la media de un mes.</p>
+    <div class="info-pop" id="infoPop" role="dialog" aria-labelledby="popTitle" hidden>
+      <div class="pop-head"><h2 id="popTitle">Cómo se calcula</h2><button type="button" class="pop-close" id="popClose" aria-label="Cerrar">×</button></div>
+    <div class="notes">
+        <p class="mono">ΔP = G × P × C / 100 &nbsp;·&nbsp; G = (P<sub>cálculo</sub> − P<sub>referencia</sub>) / P<sub>referencia</sub> × 100</p>
+        <p>G se redondea al número de decimales elegido (redondeo aritmético: 5 o más sube) antes de multiplicarlo por C. Ese G redondeado es también el que se compara con el umbral.</p>
+        <ul>
+          <li><b>Fecha puntual:</b> se toma el precio de la primera fecha de la Excel igual o posterior al día indicado. <b>Mes:</b> media simple de las semanas cuya fecha en la Excel del Ministerio pertenece a ese mes.</li>
+          <li><b>Precio para G (automático):</b> transporte desde el 16/04/2026, Pmed (PVP sin IVA y, para MMA ≥ 7,5 t, sin la devolución del gasóleo profesional); del 22/03 al 15/04/2026, PAI; antes, PVP.</li>
+          <li><b>Coeficiente C:</b> desde el 01/07/2026 (RDL 18/2026) según el Pmed del transporte; del 16/04 al 30/06/2026 (RDL 9/2026) según el PAI; antes, coeficiente fijo por vehículo. Si el transporte se indica por mes, se usa la media de ese mes.</li>
+          <li>La revisión es obligatoria cuando |G| ≥ 5 % o el umbral menor pactado por escrito, y siempre en los contratos continuados en cada periodo de facturación. No pueden computarse las bonificaciones extraordinarias del gasóleo.</li>
+        </ul>
+        <div class="ctable">
+          <table><thead><tr><th colspan="2">RDL 18/2026 · Pmed (€/l)</th></tr></thead><tbody id="ct18"></tbody></table>
+          <table><thead><tr><th colspan="2">RDL 9/2026 · PAI (€/l)</th></tr></thead><tbody id="ct9"></tbody></table>
+        </div>
+        <div class="aviso">
+          <p><b>Importante.</b> El resultado es orientativo y depende de los datos que introduzcas. Grupo Trimodos no se hace responsable de las decisiones que se tomen a partir de él; para un litigio o una reclamación, contrástalo con la <a href="https://apps.fomento.gob.es/preciogasoleo/angular_proyecto/client/gasoleoCambio" target="_blank" rel="noopener">calculadora oficial del Ministerio</a>.</p>
+          <p>El cálculo aplica la fórmula de la condición 3.4 de la Orden FOM/1882/2012, en la redacción del Real Decreto-ley 9/2026 y del Real Decreto-ley 18/2026, con las reglas del artículo 38 de la Ley 15/2009, del contrato de transporte terrestre de mercancías. Los precios son los de la evolución semanal del gasóleo de automoción en España que publica el Ministerio de Transportes y Movilidad Sostenible.</p>
+          <p>Desde la entrada en vigor del RD-ley 18/2026, el 1 de julio de 2026, cambian el precio de referencia que se usa y los umbrales que fijan el coeficiente C. <a href="https://www.transportes.gob.es/recursos_mfom/comodin/recursos/20260702_nota_metodologica_variacion_precio_transporte.pdf" target="_blank" rel="noopener">Nota metodológica del Ministerio (3/7/2026)</a>.</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 <div class="wrap">
   <header class="top">
     <div style="display:grid;gap:6px">
-      <span class="eyebrow">Ley 15/2009, art. 38 · Orden FOM/1882/2012, condición 3.4 · RD-ley 9/2026 · RD-ley 18/2026</span>
       <h1>Revisión del precio del transporte por gasóleo</h1>
     </div>
   </header>
@@ -223,7 +253,7 @@ tr.in-real td{background:var(--band-b)}
     <div class="fact"><b id="stLast">—</b><span>Última semana con precio</span></div>
     <span id="stPill" class="pill warn" hidden></span>
     <div class="actions">
-      <button type="button" class="btn" id="btnShareApp"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg><span>Compartir app</span></button>
+      <button type="button" class="btn icon-btn" id="btnShareApp" aria-label="Compartir app" title="Compartir app"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg></button>
       <button type="button" class="btn primary" id="btnInstall" hidden>Instalar app</button>
     </div>
     <p class="msg" id="stMsg"></p>
@@ -324,28 +354,6 @@ tr.in-real td{background:var(--band-b)}
     <div class="tablebox"><table id="tbl"><thead><tr><th>Semana (lunes)</th><th>PVP</th><th>PVP sin IVA</th><th>Impuesto hidrocarburos</th><th>PAI</th><th>Devol. GP</th><th>Pmed ≥ 7,5 t</th><th>Pmed &lt; 7,5 t</th></tr></thead><tbody></tbody></table></div>
   </details>
 
-  <details>
-    <summary>Cómo se calcula</summary>
-    <div class="notes">
-      <p class="mono">ΔP = G × P × C / 100 &nbsp;·&nbsp; G = (P<sub>cálculo</sub> − P<sub>referencia</sub>) / P<sub>referencia</sub> × 100</p>
-      <p>G se redondea al número de decimales elegido (redondeo aritmético: 5 o más sube) antes de multiplicarlo por C. Ese G redondeado es también el que se compara con el umbral.</p>
-      <ul>
-        <li><b>Fecha puntual:</b> se toma el precio de la primera fecha de la Excel igual o posterior al día indicado. <b>Mes:</b> media simple de las semanas cuya fecha en la Excel del Ministerio pertenece a ese mes.</li>
-        <li><b>Precio para G (automático):</b> transporte desde el 16/04/2026, Pmed (PVP sin IVA y, para MMA ≥ 7,5 t, sin la devolución del gasóleo profesional); del 22/03 al 15/04/2026, PAI; antes, PVP.</li>
-        <li><b>Coeficiente C:</b> desde el 01/07/2026 (RDL 18/2026) según el Pmed del transporte; del 16/04 al 30/06/2026 (RDL 9/2026) según el PAI; antes, coeficiente fijo por vehículo. Si el transporte se indica por mes, se usa la media de ese mes.</li>
-        <li>La revisión es obligatoria cuando |G| ≥ 5 % o el umbral menor pactado por escrito, y siempre en los contratos continuados en cada periodo de facturación. No pueden computarse las bonificaciones extraordinarias del gasóleo.</li>
-      </ul>
-      <div class="ctable">
-        <table><thead><tr><th colspan="2">RDL 18/2026 · Pmed (€/l)</th></tr></thead><tbody id="ct18"></tbody></table>
-        <table><thead><tr><th colspan="2">RDL 9/2026 · PAI (€/l)</th></tr></thead><tbody id="ct9"></tbody></table>
-      </div>
-      <div class="aviso">
-        <p><b>Importante.</b> El resultado es orientativo y depende de los datos que introduzcas. Grupo Trimodos no se hace responsable de las decisiones que se tomen a partir de él; para un litigio o una reclamación, contrástalo con la <a href="https://apps.fomento.gob.es/preciogasoleo/angular_proyecto/client/gasoleoCambio" target="_blank" rel="noopener">calculadora oficial del Ministerio</a>.</p>
-        <p>El cálculo aplica la fórmula de la condición 3.4 de la Orden FOM/1882/2012, en la redacción del Real Decreto-ley 9/2026 y del Real Decreto-ley 18/2026, con las reglas del artículo 38 de la Ley 15/2009, del contrato de transporte terrestre de mercancías. Los precios son los de la evolución semanal del gasóleo de automoción en España que publica el Ministerio de Transportes y Movilidad Sostenible.</p>
-        <p>Desde la entrada en vigor del RD-ley 18/2026, el 1 de julio de 2026, cambian el precio de referencia que se usa y los umbrales que fijan el coeficiente C. <a href="https://www.transportes.gob.es/recursos_mfom/comodin/recursos/20260702_nota_metodologica_variacion_precio_transporte.pdf" target="_blank" rel="noopener">Nota metodológica del Ministerio (3/7/2026)</a>.</p>
-      </div>
-    </div>
-  </details>
   <section class="datos" aria-label="Origen de los datos">
     <div class="fact"><b id="stFile">—</b><span>Excel del Ministerio en uso</span></div>
     <div class="fact"><b id="stOrigin">—</b><span>Última comprobación en el Ministerio</span></div>
@@ -393,7 +401,7 @@ const TX={
   copied:"Imagen copiada. Pégala con Ctrl+V (⌘+V en Mac) en el chat de WhatsApp Web.",download:"Descargar la imagen",shareFail:m=>"No se pudo preparar la imagen ("+m+").",file:"revision-gasoleo.png",
   title:"Revisión por gasóleo · Grupo Trimodos",
   appText:"Calculadora de la revisión del precio del transporte por la variación del gasóleo, con los precios semanales del Ministerio de Transportes.",
-  linkCopied:"Enlace a la app copiado. Pégalo donde quieras compartirlo.",infoT:"Qué calcula esta herramienta",
+  linkCopied:"Enlace a la app copiado. Pégalo donde quieras compartirlo.",infoT:"Cómo se calcula",shareAppT:"Compartir app",
   install:"Instalar app",installed:"App instalada. La encontrarás junto a tus otras aplicaciones.",
   iosHelp:"Para instalarla en el iPhone o iPad: pulsa el botón Compartir de Safari (el cuadrado con la flecha) y elige «Añadir a pantalla de inicio».",
   offline:"Sin conexión: se muestran los últimos precios descargados.",
@@ -428,7 +436,7 @@ const TX={
   copied:"Image copied. Paste it with Ctrl+V (⌘+V on a Mac) into the WhatsApp Web chat.",download:"Download the image",shareFail:m=>"The image could not be prepared ("+m+").",file:"diesel-price-revision.png",
   title:"Diesel Price Revision · Grupo Trimodos",
   appText:"Calculator for revising haulage prices when the price of diesel changes, using the Spanish Ministry of Transport's weekly prices.",
-  linkCopied:"Link to the app copied. Paste it wherever you want to share it.",infoT:"What this tool calculates",
+  linkCopied:"Link to the app copied. Paste it wherever you want to share it.",infoT:"How it is calculated",shareAppT:"Share app",
   install:"Install app",installed:"App installed. You will find it with your other apps.",
   iosHelp:"To install it on an iPhone or iPad: tap Safari's Share button (the square with the arrow) and choose “Add to Home Screen”.",
   offline:"Offline: showing the latest downloaded prices.",
@@ -436,10 +444,9 @@ const TX={
 };
 // Textos fijos de la página: [selector, contenido en inglés] (el español es el del propio HTML)
 const STATIC_EN=[
- ["header.top .eyebrow","Law 15/2009, art. 38 · Order FOM/1882/2012, condition 3.4 · Royal Decree-law 9/2026 · Royal Decree-law 18/2026"],
  ["header.top h1","Haulage price revision for diesel price changes"],
- ["#infoPop p","Calculates the change in the diesel price (G), the coefficient C and the percentage by which the agreed haulage price must rise or fall, using the weekly prices published by the Spanish Ministry of Transport. Each price can be the one for a date or the average for a month."],
- ["#btnInfo","@aria:What this tool calculates"],["#btnShareApp span","Share app"],[".datos","@aria:Data source"],
+ ["#popTitle","How it is calculated"],["#popClose","@aria:Close"],
+ ["#btnShareApp","@aria:Share app"],[".datos","@aria:Data source"],
  [".status","@aria:Data status"],
  [".status .fact span","Latest week with a price"],[".datos .fact:nth-child(1) span","Ministry spreadsheet in use"],[".datos .fact:nth-child(2) span","Last check with the Ministry"],
  ["#lnkMin","Open official page ↗"],["#btnInstall","Install app"],
@@ -465,7 +472,6 @@ const STATIC_EN=[
  ["#svg","@aria:Chart of the weekly diesel price"],
  ["details:nth-of-type(1) summary","Weeks used"],
  ["#tbl thead","<tr><th>Week (Monday)</th><th>Pump price</th><th>Excl. VAT</th><th>Hydrocarbon tax</th><th>Pre-tax (PAI)</th><th>Prof. refund</th><th>Pmed ≥ 7.5 t</th><th>Pmed &lt; 7.5 t</th></tr>"],
- ["details:nth-of-type(2) summary","How it is calculated"],
  [".notes > p:nth-of-type(1)","ΔP = G × P × C / 100 &nbsp;·&nbsp; G = (P<sub>calculation</sub> − P<sub>reference</sub>) / P<sub>reference</sub> × 100"],
  [".notes > p:nth-of-type(2)","G is rounded to the chosen number of decimal places (round half up) before being multiplied by C. That rounded G is also the one compared with the threshold."],
  [".notes ul","<li><b>Single date:</b> the price for the first date in the spreadsheet on or after the chosen day. <b>Month:</b> simple average of the weeks whose date in the Ministry spreadsheet falls in that month.</li><li><b>Price for G (automatic):</b> carriage from 16/04/2026, Pmed (pump price excl. VAT and, for MAM ≥ 7.5 t, excluding the professional diesel refund); from 22/03 to 15/04/2026, pre-tax price; earlier, pump price.</li><li><b>Coefficient C:</b> from 01/07/2026 (Royal Decree-law 18/2026) based on the Pmed at the time of carriage; from 16/04 to 30/06/2026 (Royal Decree-law 9/2026) based on the pre-tax price; earlier, a fixed coefficient per vehicle. If the carriage is entered by month, that month's average is used.</li><li>Revision is mandatory when |G| ≥ 5% or a lower threshold agreed in writing, and always in continuous contracts at each billing period. Extraordinary diesel subsidies may not be taken into account.</li>"],
@@ -487,7 +493,7 @@ function applyStatic(){
       if(!ES_ORIG.has(k))ES_ORIG.set(k,el.innerHTML);el.innerHTML=LANG==="en"?en:ES_ORIG.get(k);
     });
   }
-  document.documentElement.lang=LANG==="en"?"en-GB":"es-ES";document.title=L.title;$("btnInfo").title=L.infoT;
+  document.documentElement.lang=LANG==="en"?"en-GB":"es-ES";document.title=L.title;$("btnInfo").title=L.infoT;$("btnInfo").setAttribute("aria-label",L.infoT);$("btnShareApp").title=L.shareAppT;
   document.querySelectorAll(".brand .lang button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.lang===LANG)));
 }
 
@@ -719,6 +725,7 @@ comprobar();
 // ---- Información (bocadillo) ----
 const pop=$("infoPop"),bInfo=$("btnInfo");
 const cerrarInfo=()=>{pop.hidden=true;bInfo.setAttribute("aria-expanded","false")};
+$("popClose").addEventListener("click",()=>{cerrarInfo();bInfo.focus()});
 bInfo.addEventListener("click",e=>{e.stopPropagation();const abrir=pop.hidden;pop.hidden=!abrir;bInfo.setAttribute("aria-expanded",String(abrir))});
 document.addEventListener("click",e=>{if(!pop.hidden&&!pop.contains(e.target))cerrarInfo()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!pop.hidden){cerrarInfo();bInfo.focus()}});
