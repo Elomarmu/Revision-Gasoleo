@@ -59,7 +59,8 @@ def num(v):
     if v is None or v == "":
         return None
     try:
-        return round(float(str(v).replace(",", ".")), 5)
+        # Precisión completa de la Excel (7 decimales solo para quitar el ruido de coma flotante)
+        return round(float(str(v).replace(",", ".")), 7)
     except ValueError:
         return None
 
