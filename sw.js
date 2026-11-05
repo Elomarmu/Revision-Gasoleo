@@ -2,7 +2,7 @@
 // - data.json: primero la red (precios al día); sin conexión, la última copia guardada.
 // - Resto de ficheros propios y tipografías: se sirve la copia guardada y se actualiza por detrás,
 //   así una versión nueva de la página llega en la siguiente apertura.
-const VERSION = "gasoleo-v1";
+const VERSION = "gasoleo-v2";
 const BASICOS = [
   "./", "index.html", "data.json", "manifest.webmanifest",
   "img/trimodos.png", "img/stinsa.png", "img/transargi.png",

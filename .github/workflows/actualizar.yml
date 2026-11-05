@@ -3,8 +3,9 @@ name: Actualizar precios del gasóleo
 
 on:
   schedule:
-    # Miércoles, jueves y viernes a las 09:23 UTC (10:23 u 11:23 en España).
-    - cron: "23 9 * * 3,4,5"
+    # Cada 2 horas de lunes a viernes, de 07:17 a 21:17 UTC (8:17 a 22:17 en invierno en España).
+    # Solo se guarda un cambio cuando el Ministerio ha publicado datos nuevos.
+    - cron: "17 7-21/2 * * 1-5"
   workflow_dispatch: {}
   # También al cambiar el script o esta tarea, para comprobar que siguen funcionando.
   push:

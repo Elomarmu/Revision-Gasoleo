@@ -205,10 +205,11 @@ tr.in-real td{background:var(--band-b)}
     <div class="facts">
       <div class="fact"><b id="stFile">—</b><span>Excel del Ministerio en uso</span></div>
       <div class="fact"><b id="stLast">—</b><span>Última semana con precio</span></div>
-      <div class="fact"><b id="stOrigin">—</b><span>Última carga de datos</span></div>
+      <div class="fact"><b id="stOrigin">—</b><span>Última comprobación en el Ministerio</span></div>
     </div>
     <span id="stPill" class="pill info">Comprobando…</span>
     <div class="actions">
+      <button type="button" class="btn" id="btnCheck">Comprobar actualización</button>
       <button type="button" class="btn primary" id="btnInstall" hidden>Instalar app</button>
       <a class="btn" id="lnkMin" href="https://www.transportes.gob.es/transporte-terrestre/servicios-al-transportista/indice-de-variacion-semanal-de-los-precios-medios-del-gasoleo-en-espana" target="_blank" rel="noopener">Abrir página oficial ↗</a>
     </div>
@@ -356,9 +357,9 @@ const TX={
   months:["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"],
   mShort:["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"],
   ct:{A:"A · ≥ 20 t",B:"B · 3,5–20 t",C:"C · Obras",D:"D · ≤ 3,5 t"},
-  wedFri:"Miércoles a viernes",stLate:"Actualización retrasada",
+  wedFri:"Cada 2 horas (lun–vie)",stLate:"Actualización retrasada",
   msgLate:(d,u)=>"La última semana con precio es del "+d+" y debería haber datos más recientes. Hasta que se resuelva, comprueba los precios en la <a href=\""+u+"\" target=\"_blank\" rel=\"noopener\">página oficial</a>.",
-  stAuto:"Actualización automática",msgAuto:"Los precios se cargan solos desde la Excel del Ministerio, que se publica una vez por semana.",
+  stAuto:"Actualización automática",msgAuto:"Los precios se cargan solos desde la Excel del Ministerio: se comprueba cada 2 horas de lunes a viernes.",
   noPrice:"Sin precio publicado",pubOn:d=>"Precio publicado el "+d,avgN:n=>"Media de "+n+(n===1?" semana":" semanas"),
   imT1:"Revisión del precio del",imT2:"transporte por gasóleo",imVeh:"Vehículo",imUsed:b=>"Precio del gasóleo usado: "+b+" · €/litro",
   imRef:"REFERENCIA · CONTRATO",imReal:"CÁLCULO · TRANSPORTE",unit:"€/litro",imBig:"VARIACIÓN DEL PRECIO DEL TRANSPORTE",imG:"VARIACIÓN DEL GASÓLEO (G)",imC:"COEFICIENTE C",
@@ -371,7 +372,15 @@ const TX={
   title:"Revisión por gasóleo · Grupo Trimodos",
   install:"Instalar app",installed:"App instalada. La encontrarás junto a tus otras aplicaciones.",
   iosHelp:"Para instalarla en el iPhone o iPad: pulsa el botón Compartir de Safari (el cuadrado con la flecha) y elige «Añadir a pantalla de inicio».",
-  offline:"Sin conexión: se muestran los últimos precios descargados."},
+  offline:"Sin conexión: se muestran los últimos precios descargados.",
+  chk:"Comprobar actualización",chking:"Comprobando…",
+  chkNew:d=>"Precios actualizados con la Excel del Ministerio del "+d+".",
+  chkOk:(w,d)=>"Comprobado en el Ministerio "+w+": la última Excel publicada es la del "+d+" y ya está cargada.",
+  chkRun:"Ahora mismo se está comprobando la web del Ministerio. Vuelve a pulsar en un par de minutos.",
+  chkFail:w=>"La última comprobación ("+w+") no pudo leer la web del Ministerio. Se reintenta automáticamente cada 2 horas.",
+  chkNoInfo:"No se ha podido consultar el estado de la comprobación automática. Los precios mostrados son los últimos cargados.",
+  chkEvery:"Se comprueba automáticamente cada 2 horas, de lunes a viernes.",
+  today:"hoy",yesterday:"ayer",at:" a las "},
  en:{loc:"en-GB",pct:"%",
   loadFail:m=>"The prices could not be loaded ("+m+"). Reload the page in a few seconds.",noData:"No data",
   wNoMonth:"The Ministry has not published any prices for that month.",wNoDate:"The Ministry has not yet published a price on or after that date.",
@@ -388,9 +397,9 @@ const TX={
   months:["January","February","March","April","May","June","July","August","September","October","November","December"],
   mShort:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
   ct:{A:"A · ≥ 20 t",B:"B · 3.5–20 t",C:"C · Construction",D:"D · ≤ 3.5 t"},
-  wedFri:"Wednesday to Friday",stLate:"Update delayed",
+  wedFri:"Every 2 hours (Mon–Fri)",stLate:"Update delayed",
   msgLate:(d,u)=>"The latest week with a price is "+d+" and newer data should be available. Until this is resolved, check the prices on the <a href=\""+u+"\" target=\"_blank\" rel=\"noopener\">official page</a>.",
-  stAuto:"Automatic updates",msgAuto:"Prices are loaded automatically from the Ministry spreadsheet, which is published once a week.",
+  stAuto:"Automatic updates",msgAuto:"Prices are loaded automatically from the Ministry spreadsheet, checked every 2 hours from Monday to Friday.",
   noPrice:"No published price",pubOn:d=>"Price published on "+d,avgN:n=>"Average of "+n+(n===1?" week":" weeks"),
   imT1:"Haulage price revision",imT2:"for diesel price changes",imVeh:"Vehicle",imUsed:b=>"Diesel price used: "+b+" · €/litre",
   imRef:"REFERENCE · CONTRACT",imReal:"CALCULATION · CARRIAGE",unit:"€/litre",imBig:"CHANGE IN HAULAGE PRICE",imG:"CHANGE IN DIESEL PRICE (G)",imC:"COEFFICIENT C",
@@ -403,7 +412,15 @@ const TX={
   title:"Diesel Price Revision · Grupo Trimodos",
   install:"Install app",installed:"App installed. You will find it with your other apps.",
   iosHelp:"To install it on an iPhone or iPad: tap Safari's Share button (the square with the arrow) and choose “Add to Home Screen”.",
-  offline:"Offline: showing the latest downloaded prices."}
+  offline:"Offline: showing the latest downloaded prices.",
+  chk:"Check for updates",chking:"Checking…",
+  chkNew:d=>"Prices updated with the Ministry spreadsheet of "+d+".",
+  chkOk:(w,d)=>"Checked with the Ministry "+w+": the latest spreadsheet published is from "+d+" and it is already loaded.",
+  chkRun:"The Ministry website is being checked right now. Press again in a couple of minutes.",
+  chkFail:w=>"The last check ("+w+") could not read the Ministry website. It is retried automatically every 2 hours.",
+  chkNoInfo:"The status of the automatic check could not be retrieved. The prices shown are the latest loaded.",
+  chkEvery:"Checked automatically every 2 hours, Monday to Friday.",
+  today:"today",yesterday:"yesterday",at:" at "}
 };
 // Textos fijos de la página: [selector, contenido en inglés] (el español es el del propio HTML)
 const STATIC_EN=[
@@ -411,7 +428,7 @@ const STATIC_EN=[
  ["header.top h1","Haulage price revision for diesel price changes"],
  ["header.top .lede","Calculates the change in the diesel price (G), the coefficient C and the percentage by which the agreed haulage price must rise or fall, using the weekly prices published by the Spanish Ministry of Transport. Each price can be the one for a date or the average for a month."],
  [".status","@aria:Data status"],
- [".fact:nth-child(1) span","Ministry spreadsheet in use"],[".fact:nth-child(2) span","Latest week with a price"],[".fact:nth-child(3) span","Last data load"],
+ [".fact:nth-child(1) span","Ministry spreadsheet in use"],[".fact:nth-child(2) span","Latest week with a price"],[".fact:nth-child(3) span","Last check with the Ministry"],["#btnCheck","Check for updates"],
  ["#lnkMin","Open official page ↗"],["#btnInstall","Install app"],
  ["#pRef .tag","Reference"],["#hRef","Contract date"],["#pReal .tag","Calculation"],["#hReal","Date of carriage"],
  ["#pRef .seg","@aria:Reference mode"],["#pReal .seg","@aria:Calculation mode"],
@@ -650,7 +667,7 @@ const fileDateMs=()=>isoToMs(DATA.fileDate);
 function renderStatus(){
   $("stFile").textContent=fmtDate(fileDateMs());
   $("stLast").textContent=fmtDate(lastRow().ms);
-  $("stOrigin").textContent=DATA.checkedAt?fmtDate(DATA.checkedAt):L.wedFri;
+  $("stOrigin").textContent=ULTIMA?cuando(ULTIMA):L.wedFri;
   const p=$("stPill"),msg=$("stMsg");
   // El Ministerio publica una vez por semana y la tarea de GitHub la carga de miércoles a viernes.
   // Solo se avisa si han pasado más de 17 días desde la última semana con precio: eso indica que la carga automática ha fallado.
@@ -659,6 +676,40 @@ function renderStatus(){
 }
 applyStatic();sync();drawCTables();renderStatus();calc();
 
+
+// ---- Comprobar actualización ----
+// La web del Ministerio no se deja leer desde el navegador, así que la comprobación la hace la tarea de GitHub
+// (cada 2 horas). Aquí se vuelve a pedir data.json y se consulta en la API pública de GitHub la última comprobación.
+const API_RUNS="https://api.github.com/repos/Elomarmu/Revision-Gasoleo/actions/workflows/actualizar.yml/runs?per_page=1";
+var ULTIMA=null;
+function cuando(iso){
+  const d=new Date(iso),hoy=new Date(),ay=new Date(Date.now()-864e5);
+  const hm=d.toLocaleTimeString(L.loc,{hour:"2-digit",minute:"2-digit"});
+  const mismo=(a,b)=>a.toDateString()===b.toDateString();
+  return (mismo(d,hoy)?L.today:mismo(d,ay)?L.yesterday:d.toLocaleDateString(L.loc))+L.at+hm;
+}
+async function comprobar(manual){
+  const btn=$("btnCheck"),msg=$("stMsg");
+  if(manual){btn.disabled=true;btn.textContent=L.chking}
+  let nuevo=false,run=null;
+  try{
+    const r=await fetch("data.json?t="+Date.now(),{cache:"no-store"});
+    if(r.ok){const d=await r.json();if(d.fileDate!==DATA.fileDate||JSON.stringify(d.rows.at(-1))!==JSON.stringify(DATA.rows.at(-1))){DATA={...d,origin:"Ministerio de Transportes"};loadRows();nuevo=true}}
+  }catch(e){}
+  try{const r=await fetch(API_RUNS,{cache:"no-store"});if(r.ok){const j=await r.json();run=j.workflow_runs&&j.workflow_runs[0]||null}}catch(e){}
+  if(run&&run.status==="completed"&&run.conclusion==="success")ULTIMA=run.updated_at;
+  renderStatus();if(nuevo)calc();
+  if(manual){
+    btn.disabled=false;btn.textContent=L.chk;
+    if(nuevo)msg.textContent=L.chkNew(fmtDate(fileDateMs()));
+    else if(!run)msg.textContent=L.chkNoInfo;
+    else if(run.status!=="completed")msg.textContent=L.chkRun;
+    else if(run.conclusion==="success")msg.textContent=L.chkOk(cuando(run.updated_at),fmtDate(fileDateMs()))+" "+L.chkEvery;
+    else msg.textContent=L.chkFail(cuando(run.updated_at));
+  }
+}
+$("btnCheck").addEventListener("click",()=>comprobar(true));
+comprobar(false);
 // ---- App instalable (PWA) ----
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 const STANDALONE=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
@@ -674,7 +725,7 @@ $("btnInstall").addEventListener("click",async()=>{
 if(!navigator.onLine){$("installMsg").hidden=false;$("installMsg").textContent=L.offline}
 document.querySelectorAll(".brand .lang button").forEach(b=>b.addEventListener("click",()=>{
   if(b.dataset.lang===LANG)return;LANG=b.dataset.lang;L=TX[LANG];try{localStorage.setItem("gasoleo-lang",LANG)}catch(e){}
-  $("shareMsg").textContent="";$("installMsg").hidden=true;applyStatic();drawCTables();renderStatus();calc();
+  $("shareMsg").textContent="";$("installMsg").hidden=true;applyStatic();$("btnCheck").textContent=L.chk;drawCTables();renderStatus();calc();
 }));
 
 // ---- Compartir el resultado como imagen ----
