@@ -135,6 +135,10 @@ button:disabled{opacity:.55;cursor:default}
 .tag.real{background:var(--band-b);color:var(--amber)}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;height:26px;flex:none}
 .seg button{border:0;border-radius:0;padding:0 12px;height:100%;background:transparent;font-weight:600;font-size:13px;line-height:1}
+.seg5{display:grid;grid-template-columns:repeat(5,1fr);height:auto;width:100%}
+.seg5 button{height:auto;min-height:34px;padding:4px 2px;justify-content:center;text-align:center;line-height:1.15;border-right:1px solid var(--line)}
+.seg5 button:last-child{border-right:0}
+@media (max-width:520px){.seg5 button{font-size:12px}}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .fields{display:flex;flex-wrap:wrap;gap:10px}
 .field{display:grid;gap:4px;flex:1 1 140px;min-width:0}
@@ -254,30 +258,33 @@ tr.in-real td{background:var(--band-b)}
   <div class="pair">
     <section class="panel" id="pRef" aria-labelledby="hRef">
       <header>
-        <div class="ph-top">
-          <span class="tag ref">Referencia</span>
-          <div class="seg" role="group" aria-label="Modo de la referencia"><button type="button" data-mode="date">Fecha</button><button type="button" data-mode="month">Mes</button></div>
-        </div>
+        <div class="ph-top"><span class="tag ref">Referencia</span></div>
         <h2 id="hRef">Fecha del contrato</h2>
       </header>
+      <div class="seg seg5" role="group" aria-label="Modo de la referencia"><button type="button" data-mode="manual">Manual</button><button type="button" data-mode="date">Día</button><button type="button" data-mode="week">Semana</button><button type="button" data-mode="month">Mes</button><button type="button" data-mode="nat">Mes natural</button></div>
       <div class="fields">
-        <div class="field" data-for="date"><label for="refDate">Fecha</label><input type="date" id="refDate"></div>
+        <div class="field" data-for="manual"><label for="refMan">Precio (€/litro)</label><input type="number" id="refMan" min="0" step="0.00001" inputmode="decimal" placeholder="1,50000"></div>
+        <div class="field" data-for="date"><label for="refDate">Día</label><input type="date" id="refDate"></div>
+        <div class="field" data-for="week"><label for="refWeek">Cualquier día de la semana</label><input type="date" id="refWeek"></div>
         <div class="field" data-for="month"><label for="refMonth">Mes</label><input type="month" id="refMonth"></div>
+        <div class="field" data-for="nat"><label for="refNat">Mes natural</label><input type="month" id="refNat"></div>
       </div>
       <div class="readout"><span class="big" id="refVal">—</span><span class="unit">€/litro</span><span class="weeks" id="refWeeks"></span></div>
     </section>
 
     <section class="panel" id="pReal" aria-labelledby="hReal">
       <header>
-        <div class="ph-top">
-          <span class="tag real">Cálculo</span>
-          <div class="seg" role="group" aria-label="Modo del cálculo"><button type="button" data-mode="date">Fecha</button><button type="button" data-mode="month">Mes</button></div>
-        </div>
+        <div class="ph-top"><span class="tag real">Cálculo</span></div>
         <h2 id="hReal">Realización del transporte</h2>
       </header>
+      <div class="seg seg5" role="group" aria-label="Modo del cálculo"><button type="button" data-mode="manual">Manual</button><button type="button" data-mode="date">Día</button><button type="button" data-mode="week">Semana</button><button type="button" data-mode="month">Mes</button><button type="button" data-mode="nat">Mes natural</button></div>
       <div class="fields">
-        <div class="field" data-for="date"><label for="realDate">Fecha</label><input type="date" id="realDate"></div>
+        <div class="field" data-for="manual"><label for="realMan">Precio (€/litro)</label><input type="number" id="realMan" min="0" step="0.00001" inputmode="decimal" placeholder="1,50000"></div>
+        <div class="field" data-for="manual"><label for="realMdate">Fecha del transporte</label><input type="date" id="realMdate"></div>
+        <div class="field" data-for="date"><label for="realDate">Día</label><input type="date" id="realDate"></div>
+        <div class="field" data-for="week"><label for="realWeek">Cualquier día de la semana</label><input type="date" id="realWeek"></div>
         <div class="field" data-for="month"><label for="realMonth">Mes</label><input type="month" id="realMonth"></div>
+        <div class="field" data-for="nat"><label for="realNat">Mes natural</label><input type="month" id="realNat"></div>
       </div>
       <div class="readout"><span class="big" id="realVal">—</span><span class="unit">€/litro</span><span class="weeks" id="realWeeks"></span></div>
     </section>
@@ -351,9 +358,9 @@ tr.in-real td{background:var(--band-b)}
       <p class="mono">ΔP = G × P × C / 100 &nbsp;·&nbsp; G = (P<sub>cálculo</sub> − P<sub>referencia</sub>) / P<sub>referencia</sub> × 100</p>
       <p>G se redondea al número de decimales elegido (redondeo aritmético: 5 o más sube) antes de multiplicarlo por C. Ese G redondeado es también el que se compara con el umbral.</p>
       <ul>
-        <li><b>Fecha puntual:</b> se toma el precio de la primera fecha de la Excel igual o posterior al día indicado. <b>Mes:</b> media simple de las semanas cuya fecha en la Excel del Ministerio pertenece a ese mes.</li>
+        <li><b>Manual:</b> el precio que escribas, en €/litro. <b>Día:</b> precio de la primera fecha de la Excel igual o posterior al día indicado. <b>Semana:</b> precio de la semana (de lunes a domingo) que contiene el día indicado. <b>Mes:</b> media simple de las semanas cuya fecha en la Excel pertenece a ese mes. <b>Mes natural:</b> cada día del mes toma el precio de su semana y se hace la media de todos los días, de modo que una semana a caballo entre dos meses cuenta solo por los días que caen dentro.</li>
         <li><b>Precio para G (automático):</b> transporte desde el 16/04/2026, Pmed (PVP sin IVA y, para MMA ≥ 7,5 t, sin la devolución del gasóleo profesional); del 22/03 al 15/04/2026, PAI; antes, PVP.</li>
-        <li><b>Coeficiente C:</b> desde el 01/07/2026 (RDL 18/2026) según el Pmed del transporte; del 16/04 al 30/06/2026 (RDL 9/2026) según el PAI; antes, coeficiente fijo por vehículo. Si el transporte se indica por mes, se usa la media de ese mes.</li>
+        <li><b>Coeficiente C:</b> desde el 01/07/2026 (RDL 18/2026) según el Pmed del transporte; del 16/04 al 30/06/2026 (RDL 9/2026) según el PAI; antes, coeficiente fijo por vehículo. Si el transporte se indica por semana o por mes, se usa el mismo precio medio; con precio manual, ese precio.</li>
         <li>La revisión es obligatoria cuando |G| ≥ 5 % o el umbral menor pactado por escrito, y siempre en los contratos continuados en cada periodo de facturación. No pueden computarse las bonificaciones extraordinarias del gasóleo.</li>
       </ul>
       <div class="ctable">
@@ -385,6 +392,10 @@ const TX={
   wDate:d=>"Precio del "+d+" (primera fecha publicada igual o posterior)",
   wMonth:(n,mes,l)=>"Media de "+n+(n===1?" semana":" semanas")+" de "+mes+": "+l,monthOf:(m,y)=>m+" de "+y,
   wIncomplete:" · El mes aún no está completo en la Excel.",
+  wManual:"Precio introducido a mano.",wManualNo:"Escribe el precio en €/litro.",wNoWeek:"El Ministerio no tiene precio publicado para esa semana.",
+  wWeek:(a,b,p)=>"Semana del "+a+" al "+b+" (precio publicado el "+p+")",
+  wNat:(mes,n,l)=>"Media diaria de "+mes+" ("+n+(n===1?" día":" días")+"): "+l,dd:n=>n+" d",wNatPartial:n=>" · Faltan "+n+(n===1?" día":" días")+" sin precio publicado.",
+  manualLbl:"Precio manual",manualDet:"Introducido a mano",weekLbl:(a,b)=>"Semana "+a+"–"+b,weekDet:p=>"Precio publicado el "+p,natLbl:m=>m+" (mes natural)",natDet:n=>"Media diaria de "+n+(n===1?" día":" días"),cManPrice:"precio manual",
   cMan:"Fijado a mano",cFixed:"Coeficiente fijo anterior · verifícalo",
   newPrice:v=>"Nuevo precio: "+v+" €",
   fNoRound:g=>"Sin redondear (G = "+g+") · ",fRound:g=>"G sin redondear "+g+" · ",
@@ -420,6 +431,10 @@ const TX={
   wDate:d=>"Price of "+d+" (first published date on or after it)",
   wMonth:(n,mes,l)=>"Average of "+n+(n===1?" week":" weeks")+" in "+mes+": "+l,monthOf:(m,y)=>m+" "+y,
   wIncomplete:" · The month is not yet complete in the spreadsheet.",
+  wManual:"Price entered manually.",wManualNo:"Enter the price in €/litre.",wNoWeek:"The Ministry has not published a price for that week.",
+  wWeek:(a,b,p)=>"Week from "+a+" to "+b+" (price published on "+p+")",
+  wNat:(mes,n,l)=>"Daily average for "+mes+" ("+n+(n===1?" day":" days")+"): "+l,dd:n=>n+" d",wNatPartial:n=>" · "+n+(n===1?" day has":" days have")+" no published price yet.",
+  manualLbl:"Manual price",manualDet:"Entered manually",weekLbl:(a,b)=>"Week "+a+"–"+b,weekDet:p=>"Price published on "+p,natLbl:m=>m+" (calendar month)",natDet:n=>"Daily average of "+n+(n===1?" day":" days"),cManPrice:"manual price",
   cMan:"Set manually",cFixed:"Previous fixed coefficient · please check",
   newPrice:v=>"New price: €"+v,
   fNoRound:g=>"Not rounded (G = "+g+") · ",fRound:g=>"G before rounding "+g+" · ",
@@ -460,8 +475,8 @@ const STATIC_EN=[
  ["#lnkMin","Open official page ↗"],["#btnInstall","Install app"],
  ["#pRef .tag","Reference"],["#hRef","Contract date"],["#pReal .tag","Calculation"],["#hReal","Date of carriage"],
  ["#pRef .seg","@aria:Reference mode"],["#pReal .seg","@aria:Calculation mode"],
- [".seg button[data-mode=date]","Date"],[".seg button[data-mode=month]","Month"],
- ["[data-for=date] label","Date"],["[data-for=month] label","Month"],[".readout .unit","€/litre"],
+ [".seg button[data-mode=manual]","Manual"],[".seg button[data-mode=date]","Day"],[".seg button[data-mode=week]","Week"],[".seg button[data-mode=month]","Month"],[".seg button[data-mode=nat]","Calendar month"],
+ ["[data-for=manual] label[for$=Man]","Price (€/litre)"],["label[for=realMdate]","Date of carriage"],["[data-for=date] label","Day"],["[data-for=week] label","Any day of the week"],["[data-for=month] label","Month"],["[data-for=nat] label","Calendar month"],[".readout .unit","€/litre"],
  ["#hSet","Vehicle and contract"],["label[for=veh]","Vehicle type"],
  ["#veh option[value=A]","A · MAM ≥ 20,000 kg (except construction)"],["#veh option[value=B]","B · MAM 3,500–20,000 kg (except construction)"],
  ["#veh option[value=C]","C · Construction vehicles, MAM &gt; 3,500 kg"],["#veh option[value=D]","D · MAM ≤ 3,500 kg"],
@@ -482,7 +497,7 @@ const STATIC_EN=[
  ["#tbl thead","<tr><th>Week (Monday)</th><th>Pump price</th><th>Excl. VAT</th><th>Hydrocarbon tax</th><th>Pre-tax (PAI)</th><th>Prof. refund</th><th>Pmed ≥ 7.5 t</th><th>Pmed &lt; 7.5 t</th></tr>"],
  [".notes > p:nth-of-type(1)","ΔP = G × P × C / 100 &nbsp;·&nbsp; G = (P<sub>calculation</sub> − P<sub>reference</sub>) / P<sub>reference</sub> × 100"],
  [".notes > p:nth-of-type(2)","G is rounded to the chosen number of decimal places (round half up) before being multiplied by C. That rounded G is also the one compared with the threshold."],
- [".notes ul","<li><b>Single date:</b> the price for the first date in the spreadsheet on or after the chosen day. <b>Month:</b> simple average of the weeks whose date in the Ministry spreadsheet falls in that month.</li><li><b>Price for G (automatic):</b> carriage from 16/04/2026, Pmed (pump price excl. VAT and, for MAM ≥ 7.5 t, excluding the professional diesel refund); from 22/03 to 15/04/2026, pre-tax price; earlier, pump price.</li><li><b>Coefficient C:</b> from 01/07/2026 (Royal Decree-law 18/2026) based on the Pmed at the time of carriage; from 16/04 to 30/06/2026 (Royal Decree-law 9/2026) based on the pre-tax price; earlier, a fixed coefficient per vehicle. If the carriage is entered by month, that month's average is used.</li><li>Revision is mandatory when |G| ≥ 5% or a lower threshold agreed in writing, and always in continuous contracts at each billing period. Extraordinary diesel subsidies may not be taken into account.</li>"],
+ [".notes ul","<li><b>Manual:</b> the price you enter, in €/litre. <b>Day:</b> the price for the first date in the spreadsheet on or after the chosen day. <b>Week:</b> the price for the week (Monday to Sunday) containing the chosen day. <b>Month:</b> simple average of the weeks whose date in the spreadsheet falls in that month. <b>Calendar month:</b> each day of the month takes the price of its week and all days are averaged, so a week that straddles two months only counts for the days that fall inside.</li><li><b>Price for G (automatic):</b> carriage from 16/04/2026, Pmed (pump price excl. VAT and, for MAM ≥ 7.5 t, excluding the professional diesel refund); from 22/03 to 15/04/2026, pre-tax price; earlier, pump price.</li><li><b>Coefficient C:</b> from 01/07/2026 (Royal Decree-law 18/2026) based on the Pmed at the time of carriage; from 16/04 to 30/06/2026 (Royal Decree-law 9/2026) based on the pre-tax price; earlier, a fixed coefficient per vehicle. If the carriage is entered by week or month, the same average price is used; with a manual price, that price.</li><li>Revision is mandatory when |G| ≥ 5% or a lower threshold agreed in writing, and always in continuous contracts at each billing period. Extraordinary diesel subsidies may not be taken into account.</li>"],
  [".ctable table:nth-child(1) th","RDL 18/2026 · Pmed (€/l)"],[".ctable table:nth-child(2) th","RDL 9/2026 · Pre-tax price (€/l)"],
  [".aviso p:nth-child(1)","<b>Important.</b> The result is for guidance only and depends on the data you enter. Grupo Trimodos accepts no liability for decisions taken on the basis of it; for a dispute or claim, check it against the <a href=\"https://apps.fomento.gob.es/preciogasoleo/angular_proyecto/client/gasoleoCambio\" target=\"_blank\" rel=\"noopener\">Ministry's official calculator</a>."],
  [".aviso p:nth-child(2)","The calculation applies the formula in condition 3.4 of Order FOM/1882/2012, as amended by Royal Decree-law 9/2026 and Royal Decree-law 18/2026, under the rules of article 38 of Law 15/2009 on contracts for the carriage of goods by land. Prices are the weekly figures for automotive diesel in Spain published by the Spanish Ministry of Transport and Sustainable Mobility."],
@@ -543,34 +558,50 @@ function val(row,basis,ge75){
   if(p==null&&row.pvpsin!=null)p=row.pvpsin-(ge75?(row.gp||0):0);
   return p;
 }
-function weeksFor(spec){
-  if(spec.mode==="date"){
-    const t=isoToMs(spec.date); if(!isFinite(t))return[];
-    const w=ROWS.find(r=>r.ms>=t)||null;
-    return w?[w]:[];
-  }
-  if(!/^\d{4}-\d{2}$/.test(spec.month||""))return[];
-  const[y,m]=spec.month.split("-").map(Number);
-  return ROWS.filter(r=>{const d=new Date(r.ms);return d.getUTCFullYear()===y&&d.getUTCMonth()+1===m});
+// Selección de semanas según el modo. Devuelve {items:[{row,w}], manual, days, missing}.
+const okMonth=v=>/^\d{4}-\d{2}$/.test(v||"");
+const mondayOf=ms=>{const wd=(new Date(ms).getUTCDay()+6)%7;return ms-wd*DAY};
+const rowOfWeek=ms=>{const mon=mondayOf(ms);return ROWS.find(r=>r.ms>=mon&&r.ms<mon+7*DAY)||null};
+function select(spec){
+  const out={items:[],manual:null,days:0,missing:0};
+  if(spec.mode==="manual"){const v=parseFloat(spec.man);out.manual=isFinite(v)&&v>0?v:null;return out}
+  if(spec.mode==="date"){const t=isoToMs(spec.date);if(!isFinite(t))return out;const w=ROWS.find(r=>r.ms>=t);if(w)out.items=[{row:w,w:1}];return out}
+  if(spec.mode==="week"){const t=isoToMs(spec.week);if(!isFinite(t))return out;const w=rowOfWeek(t);if(w)out.items=[{row:w,w:1}];return out}
+  const v=spec.mode==="nat"?spec.nat:spec.month;if(!okMonth(v))return out;
+  const[y,m]=v.split("-").map(Number);
+  if(spec.mode==="month"){out.items=ROWS.filter(r=>{const d=new Date(r.ms);return d.getUTCFullYear()===y&&d.getUTCMonth()+1===m}).map(r=>({row:r,w:1}));return out}
+  // Mes natural: cada día toma el precio de su semana (lunes a domingo); media ponderada por días
+  const ini=Date.UTC(y,m-1,1),fin=Date.UTC(y,m,1),peso=new Map();
+  for(let d=ini;d<fin;d+=DAY){out.days++;const r=rowOfWeek(d);if(r)peso.set(r,(peso.get(r)||0)+1);else out.missing++}
+  out.items=[...peso.entries()].sort((a,b)=>a[0].ms-b[0].ms).map(([row,w])=>({row,w}));
+  return out;
 }
-function avg(weeks,basis,ge75){
-  const v=weeks.map(w=>val(w,basis,ge75)).filter(x=>x!=null&&isFinite(x));
-  return v.length?{v:v.reduce((s,x)=>s+x,0)/v.length,n:v.length}:{v:null,n:0};
+function valueOf(sel,basis,ge75){
+  if(sel.manual!=null)return sel.manual;
+  let sw=0,sv=0;for(const{row,w}of sel.items){const v=val(row,basis,ge75);if(v!=null&&isFinite(v)){sv+=v*w;sw+=w}}
+  return sw?sv/sw:null;
 }
-function specEnd(spec){if(spec.mode==="date")return isoToMs(spec.date);if(!/^\d{4}-\d{2}$/.test(spec.month||""))return NaN;const[y,m]=spec.month.split("-").map(Number);return Date.UTC(y,m,0)}
+const rowsOf=sel=>sel.items.map(i=>i.row);
+function specEnd(spec){
+  if(spec.mode==="manual")return isoToMs(spec.mdate);
+  if(spec.mode==="date")return isoToMs(spec.date);
+  if(spec.mode==="week"){const t=isoToMs(spec.week);return isFinite(t)?mondayOf(t)+6*DAY:NaN}
+  const v=spec.mode==="nat"?spec.nat:spec.month;if(!okMonth(v))return NaN;const[y,m]=v.split("-").map(Number);return Date.UTC(y,m,0);
+}
 
 // ---- Estado de la interfaz ----
 const lastMs=lastRow().ms;
-const S={ref:{mode:"date",date:"2026-01-15",month:"2025-12"},
-         real:{mode:"month",date:msToIso(lastMs),month:msToIso(lastMs).slice(0,7)},
+const S={ref:{mode:"date",date:"2026-01-15",week:"2026-01-15",month:"2026-01",nat:"2026-01",man:"",mdate:""},
+         real:{mode:"nat",date:msToIso(lastMs),week:msToIso(lastMs),month:msToIso(lastMs).slice(0,7),nat:msToIso(lastMs).slice(0,7),man:"",mdate:msToIso(lastMs)},
          veh:"A",basis:"auto",price:1000,thr:5,rnd:"2",gp:true,cont:false,cMan:false,cVal:0.4};
-try{const s=JSON.parse(localStorage.getItem("gasoleo-calc-pruebas")||"null");if(s){for(const k of["ref","real"])if(s[k]){if(s[k].mode!=="date")s[k].mode="month";if(!s[k].month)s[k].month=S[k].month;s[k]={mode:s[k].mode,date:s[k].date||S[k].date,month:s[k].month}}Object.assign(S,s)}}catch(e){}
+try{const s=JSON.parse(localStorage.getItem("gasoleo-calc-pruebas")||"null");if(s){for(const k of["ref","real"])if(s[k]){const o=s[k];s[k]={...S[k],...o};if(!["manual","date","week","month","nat"].includes(s[k].mode))s[k].mode="date"}Object.assign(S,s)}}catch(e){}
 function save(){try{localStorage.setItem("gasoleo-calc-pruebas",JSON.stringify(S))}catch(e){}}
 
 function bindPanel(key,panelId,prefix){
   const p=$(panelId);
   p.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>{S[key].mode=b.dataset.mode;sync();calc()}));
-  ["Date","Month"].forEach(k=>{const el=$(prefix+k);el.addEventListener("change",()=>{S[key][k.toLowerCase()]=el.value;calc()})});
+  [["Date","date"],["Week","week"],["Month","month"],["Nat","nat"],["Mdate","mdate"]].forEach(([k,f])=>{const el=$(prefix+k);if(el)el.addEventListener("change",()=>{S[key][f]=el.value;calc()})});
+  $(prefix+"Man").addEventListener("input",e=>{S[key].man=e.target.value;calc()});
 }
 bindPanel("ref","pRef","ref"); bindPanel("real","pReal","real");
 $("veh").addEventListener("change",e=>{S.veh=e.target.value;if(S.veh==="A")S.gp=true;if(S.veh==="D")S.gp=false;sync();calc()});
@@ -588,7 +619,7 @@ function sync(){
     const p=$(pid),m=S[key].mode;
     p.querySelectorAll(".seg button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.mode===m)));
     p.querySelectorAll("[data-for]").forEach(f=>f.hidden=f.dataset.for!==m);
-    $(pre+"Date").value=S[key].date||"";$(pre+"Month").value=S[key].month||"";
+    $(pre+"Date").value=S[key].date||"";$(pre+"Week").value=S[key].week||"";$(pre+"Month").value=S[key].month||"";$(pre+"Nat").value=S[key].nat||"";$(pre+"Man").value=S[key].man||"";if($(pre+"Mdate"))$(pre+"Mdate").value=S[key].mdate||"";
   }
   $("veh").value=S.veh;$("basis").value=S.basis;$("price").value=isFinite(S.price)?S.price:"";$("thr").value=isFinite(S.thr)?S.thr:"";$("rnd").value=S.rnd;
   $("gp").checked=S.gp;$("gp").disabled=S.veh==="A"||S.veh==="D";$("cont").checked=S.cont;
@@ -596,11 +627,16 @@ function sync(){
 }
 
 const BN=b=>L.basis[b];
-function weeksText(ws,spec){
-  if(!ws.length)return spec.mode==="month"?L.wNoMonth:L.wNoDate;
-  if(spec.mode==="date")return L.wDate(fmtDate(ws[0].ms));
-  const d=new Date(ws[0].ms),mes=L.monthOf(L.months[d.getUTCMonth()],d.getUTCFullYear());
-  return L.wMonth(ws.length,mes,ws.map(w=>fmtDate(w.ms).slice(0,5)).join(", "));
+function weeksText(sel,spec){
+  if(spec.mode==="manual")return sel.manual!=null?L.wManual:L.wManualNo;
+  if(!sel.items.length)return spec.mode==="week"?L.wNoWeek:(spec.mode==="month"||spec.mode==="nat")?L.wNoMonth:L.wNoDate;
+  const r0=sel.items[0].row;
+  if(spec.mode==="date")return L.wDate(fmtDate(r0.ms));
+  if(spec.mode==="week"){const mon=mondayOf(isoToMs(spec.week));return L.wWeek(fmtDate(mon).slice(0,5),fmtDate(mon+6*DAY),fmtDate(r0.ms))}
+  const v=spec.mode==="nat"?spec.nat:spec.month,[y,m]=v.split("-").map(Number),mes=L.monthOf(L.months[m-1],y);
+  if(spec.mode==="month")return L.wMonth(sel.items.length,mes,sel.items.map(i=>fmtDate(i.row.ms).slice(0,5)).join(", "));
+  const usados=sel.days-sel.missing;
+  return L.wNat(mes,usados,sel.items.map(i=>fmtDate(i.row.ms).slice(0,5)+" ("+L.dd(i.w)+")").join(", "))+(sel.missing?L.wNatPartial(sel.missing):"");
 }
 
 let LAST={};
@@ -610,18 +646,18 @@ function calc(){
   const tEnd=specEnd(S.real);
   let basis=S.basis;
   if(basis==="auto")basis=!isFinite(tEnd)?"pmed":tEnd>=D_RDL9?"pmed":tEnd>=D_RDL7?"pai":"pvp";
-  const wr=weeksFor(S.ref),wt=weeksFor(S.real);
-  const r=avg(wr,basis,ge),t=avg(wt,basis,ge);
+  const sr=select(S.ref),st=select(S.real),wr=rowsOf(sr),wt=rowsOf(st);
+  const r={v:valueOf(sr,basis,ge)},t={v:valueOf(st,basis,ge)};
   $("refVal").textContent=nf(r.v,5);$("realVal").textContent=nf(t.v,5);
-  $("refWeeks").textContent=weeksText(wr,S.ref);$("realWeeks").textContent=weeksText(wt,S.real);
+  $("refWeeks").textContent=weeksText(sr,S.ref);$("realWeeks").textContent=weeksText(st,S.real);
   const lastData=lastRow().ms;
   if(S.real.mode==="month"&&isFinite(tEnd)&&tEnd>lastData+6*DAY&&wt.length)$("realWeeks").textContent+=L.wIncomplete;
 
   // C
   let C=null,cNote="";
   if(S.cMan){C=S.cVal;cNote=L.cMan;}
-  else if(isFinite(tEnd)&&tEnd>=D_RDL18){const pm=avg(wt,"pmed",ge).v;if(pm!=null){C=pick(T18[S.veh],pm);cNote="RDL 18/2026 · Pmed "+nf(pm,3)+" €/l"}}
-  else if(isFinite(tEnd)&&tEnd>=D_RDL9){const pa=avg(wt,"pai",ge).v;if(pa!=null){C=pick(T9[S.veh],pa);cNote="RDL 9/2026 · "+BN("pai")+" "+nf(pa,3)+" €/l"}}
+  else if(isFinite(tEnd)&&tEnd>=D_RDL18){const pm=valueOf(st,"pmed",ge);if(pm!=null){C=pick(T18[S.veh],pm);cNote="RDL 18/2026 · "+(st.manual!=null?L.cManPrice:"Pmed")+" "+nf(pm,3)+" €/l"}}
+  else if(isFinite(tEnd)&&tEnd>=D_RDL9){const pa=valueOf(st,"pai",ge);if(pa!=null){C=pick(T9[S.veh],pa);cNote="RDL 9/2026 · "+(st.manual!=null?L.cManPrice:BN("pai"))+" "+nf(pa,3)+" €/l"}}
   else if(isFinite(tEnd)){C=FIXED[S.veh];cNote=L.cFixed}
 
   const G0=(r.v&&t.v!=null)?(t.v-r.v)/r.v*100:null;
@@ -763,14 +799,19 @@ document.querySelectorAll(".brand .lang button").forEach(b=>b.addEventListener("
 }));
 
 // ---- Compartir el resultado como imagen ----
+function monthName(v){if(!okMonth(v))return "—";const[y,m]=v.split("-").map(Number);return L.months[m-1].charAt(0).toUpperCase()+L.months[m-1].slice(1)+" "+y}
 function specLabel(spec){
+  if(spec.mode==="manual")return L.manualLbl;
   if(spec.mode==="date")return fmtDate(isoToMs(spec.date));
-  if(!/^\d{4}-\d{2}$/.test(spec.month||""))return "—";
-  const[y,m]=spec.month.split("-").map(Number);return L.months[m-1].charAt(0).toUpperCase()+L.months[m-1].slice(1)+" "+y;
+  if(spec.mode==="week"){const t=isoToMs(spec.week);if(!isFinite(t))return "—";const mon=mondayOf(t);return L.weekLbl(fmtDate(mon).slice(0,5),fmtDate(mon+6*DAY))}
+  if(spec.mode==="nat")return L.natLbl(monthName(spec.nat));
+  return monthName(spec.month);
 }
 function specDetail(ws,spec){
+  if(spec.mode==="manual")return L.manualDet;
   if(!ws.length)return L.noPrice;
-  if(spec.mode==="date")return L.pubOn(fmtDate(ws[0].ms));
+  if(spec.mode==="date"||spec.mode==="week")return L.pubOn(fmtDate(ws[0].ms));
+  if(spec.mode==="nat"){const sel=select(spec);return L.natDet(sel.days-sel.missing)}
   return L.avgN(ws.length);
 }
 function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
