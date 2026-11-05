@@ -1,1 +1,44 @@
 
+name: Actualizar precios del gasóleo
+
+on:
+  schedule:
+    # Miércoles, jueves y viernes a las 09:23 UTC (10:23 u 11:23 en España).
+    - cron: "23 9 * * 3,4,5"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: actualizar-precios
+  cancel-in-progress: false
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install openpyxl==3.1.5
+
+      - name: Descargar y leer la Excel del Ministerio
+        run: python scripts/actualizar.py
+
+      - name: Guardar cambios
+        run: |
+          if git diff --quiet -- data.json; then
+            echo "Sin cambios en data.json"
+            exit 0
+          fi
+          git config user.name "actualizador-gasoleo"
+          git config user.email "actions@users.noreply.github.com"
+          git add data.json
+          git commit -m "Precios del gasóleo actualizados"
+          git push
