@@ -1,0 +1,60 @@
+name: Publicar la calculadora
+
+# Publica la página en GitHub Pages con una tarea propia, en lugar de la publicación automática por rama,
+# que falla de forma intermitente («Deployment failed, try again later»). Si el despliegue falla, lo reintenta.
+# Requiere en Settings → Pages → Source la opción «GitHub Actions».
+on:
+  push:
+    branches: [main]
+  # Cuando la tarea de precios termina (sus commits no lanzan otras tareas por sí solos)
+  workflow_run:
+    workflows: ["Actualizar precios del gasóleo"]
+    types: [completed]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url || steps.reintento.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/configure-pages@v5
+
+      - name: Preparar los ficheros de la web
+        run: |
+          mkdir _site
+          cp index.html data.json manifest.webmanifest sw.js _site/
+          cp -r img _site/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Publicar
+        id: despliegue
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      - name: Esperar antes de reintentar
+        if: steps.despliegue.outcome == 'failure'
+        run: sleep 60
+
+      - name: Reintentar la publicación
+        id: reintento
+        if: steps.despliegue.outcome == 'failure'
+        uses: actions/deploy-pages@v4
