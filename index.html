@@ -185,7 +185,7 @@ tr.in-real td{background:var(--band-b)}
     <div class="facts">
       <div class="fact"><b id="stFile">—</b><span>Excel del Ministerio en uso</span></div>
       <div class="fact"><b id="stLast">—</b><span>Última semana con precio</span></div>
-      <div class="fact"><b id="stOrigin">—</b><span>Última actualización automática</span></div>
+      <div class="fact"><b id="stOrigin">—</b><span>Última carga de datos</span></div>
     </div>
     <span id="stPill" class="pill info">Comprobando…</span>
     <div class="actions">
@@ -503,11 +503,13 @@ const fileDateMs=()=>isoToMs(DATA.fileDate);
 function renderStatus(){
   $("stFile").textContent=fmtDate(fileDateMs());
   $("stLast").textContent=fmtDate(lastRow().ms);
-  $("stOrigin").textContent=DATA.checkedAt?("Actualizado el "+new Date(DATA.checkedAt).toLocaleString("es-ES",{dateStyle:"short",timeStyle:"short"})):"Ministerio de Transportes";
+  $("stOrigin").textContent=DATA.checkedAt?new Date(DATA.checkedAt).toLocaleDateString("es-ES"):"Miércoles a viernes";
   const p=$("stPill"),msg=$("stMsg");
-  if(Date.now()>lastRow().ms+10*DAY){p.className="pill warn";p.textContent="Revisa si hay datos nuevos";
-    msg.innerHTML="Los precios se actualizan solos cada semana, pero la última semana con precio es del "+fmtDate(lastRow().ms)+". Puede que el Ministerio aún no haya publicado la siguiente; compruébalo en la página oficial.";}
-  else{p.className="pill ok";p.textContent="Datos al día";msg.textContent="Los precios se actualizan automáticamente cada semana desde la Excel del Ministerio.";}
+  // El Ministerio publica una vez por semana y la tarea de GitHub la carga de miércoles a viernes.
+  // Solo se avisa si han pasado más de 17 días desde la última semana con precio: eso indica que la carga automática ha fallado.
+  if(Date.now()>lastRow().ms+17*DAY){p.className="pill warn";p.textContent="Actualización retrasada";
+    msg.innerHTML="La última semana con precio es del "+fmtDate(lastRow().ms)+" y debería haber datos más recientes. Hasta que se resuelva, comprueba los precios en la <a href=\""+MIN_URL+"\" target=\"_blank\" rel=\"noopener\">página oficial</a>.";}
+  else{p.className="pill ok";p.textContent="Actualización automática";msg.textContent="Los precios se cargan solos desde la Excel del Ministerio, que se publica una vez por semana.";}
 }
 sync();drawCTables();renderStatus();calc();
 })();
