@@ -61,13 +61,20 @@ h3{font-size:17px}
 .brand .units img{height:30px;width:auto}
 .brand .units .sep{width:1px;height:30px;background:#dcdfd8}
 .brand .alt{font-family:var(--f-display);font-weight:800;color:#1d1d1b;font-size:18px;letter-spacing:.02em}
+.brand{position:relative}
+.brand .tools{display:flex;align-items:center;gap:8px}
+.info-btn{width:28px;height:28px;padding:0;border-radius:50%;border:1.5px solid #1d1d1b;background:#fff;color:#1d1d1b;font:700 15px/1 Georgia,"Times New Roman",serif;font-style:italic;justify-content:center}
+.info-btn[aria-expanded="true"]{background:#1d1d1b;color:#fff}
+.info-pop{position:absolute;z-index:30;top:calc(100% - 4px);right:max(16px,env(safe-area-inset-right,0px));width:min(380px,calc(100vw - 32px));background:#1d1d1b;color:#fff;border-radius:12px;padding:14px 16px;font-size:14px;line-height:1.55;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+@media (min-width:521px){.brand .units{margin-left:auto}}
+.info-pop::before{content:"";position:absolute;top:-7px;right:92px;width:14px;height:14px;background:#1d1d1b;transform:rotate(45deg);border-radius:2px}
 .brand .lang{display:inline-flex;border:1px solid #dcdfd8;border-radius:6px;overflow:hidden;height:28px}
 .brand .lang button{border:0;border-radius:0;background:#fff;color:#1d1d1b;font:700 13px/1 var(--f-body);padding:0 11px;height:100%;cursor:pointer}
 .brand .lang button[aria-pressed="true"]{background:#1d1d1b;color:#fff}
 .brand .lang button:focus-visible{outline:2px solid #00857a;outline-offset:-2px}
 .foot{display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:14px}
 .foot b{font-family:var(--f-display);color:var(--ink)}
-@media (max-width:520px){.brand-in{justify-content:center;position:relative;padding-top:20px}.brand .lang{position:absolute;top:8px;right:max(12px,env(safe-area-inset-right,0px));height:24px}.brand .lang button{padding:0 8px;font-size:12px}.brand .gt{height:36px}.brand .units img{height:24px}.brand .units{gap:12px}}
+@media (max-width:520px){.brand-in{justify-content:center;padding-top:22px}.brand .tools{position:absolute;top:8px;right:max(12px,env(safe-area-inset-right,0px));gap:6px}.brand .lang{height:24px}.brand .lang button{padding:0 8px;font-size:12px}.info-btn{width:24px;height:24px;font-size:13px}.info-pop{top:40px;right:12px}.info-pop::before{right:73px}.brand .gt{height:36px}.brand .units img{height:24px}.brand .units{gap:12px}}
 .mono,.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 p{margin:0}
 a{color:var(--accent)}
@@ -76,11 +83,15 @@ header.top .lede{color:var(--muted);max-width:62ch}
 
 /* Franja de estado de los datos */
 .status{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
-.status .facts{display:flex;flex-wrap:wrap;gap:6px 18px;flex:1 1 320px;min-width:0}
-.status .fact{display:grid}
-.status .fact b{font-family:var(--f-mono);font-weight:500}
+.status .fact{flex:1 1 auto}
+.fact{display:grid}
+.fact b{font-family:var(--f-mono);font-weight:500}
 #stOrigin{font-family:var(--f-body);font-weight:600}
-.status .fact span{font-size:12px;color:var(--muted)}
+#btnShareApp svg{flex:none}
+.fact span{font-size:12px;color:var(--muted)}
+.datos{display:flex;flex-wrap:wrap;align-items:center;gap:8px 24px;padding-block:4px;font-size:14px}
+.datos .fact b{font-size:14px}
+.datos #lnkMin{font-weight:600;font-size:14px}
 .pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:600;white-space:nowrap}
 .pill::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
 .pill.ok{background:var(--good-soft);color:var(--good)}
@@ -187,8 +198,14 @@ tr.in-real td{background:var(--band-b)}
       <span class="sep" aria-hidden="true"></span>
       <a href="https://www.grupotrimodos.com/transargi" target="_blank" rel="noopener" aria-label="TRANSARGI"><img src="img/transargi.png" alt="Transargi" width="131" height="30" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'alt',textContent:'TRANSARGI'}))"></a>
     </div>
-    <div class="lang" role="group" aria-label="Idioma / Language">
-      <button type="button" data-lang="es" aria-pressed="true" title="Español (España)">ES</button><button type="button" data-lang="en" aria-pressed="false" title="English (UK)">EN</button>
+    <div class="tools">
+      <button type="button" class="info-btn" id="btnInfo" aria-expanded="false" aria-controls="infoPop" aria-label="Qué calcula esta herramienta" title="Qué calcula esta herramienta">i</button>
+      <div class="lang" role="group" aria-label="Idioma / Language">
+        <button type="button" data-lang="es" aria-pressed="true" title="Español (España)">ES</button><button type="button" data-lang="en" aria-pressed="false" title="English (UK)">EN</button>
+      </div>
+    </div>
+    <div class="info-pop" id="infoPop" role="dialog" aria-labelledby="btnInfo" hidden>
+      <p>Calcula la variación del gasóleo (G), el coeficiente C y el porcentaje que debe subir o bajar el precio pactado, con los precios semanales que publica el Ministerio de Transportes. Cada precio puede ser el de una fecha o la media de un mes.</p>
     </div>
   </div>
 </div>
@@ -198,19 +215,14 @@ tr.in-real td{background:var(--band-b)}
       <span class="eyebrow">Ley 15/2009, art. 38 · Orden FOM/1882/2012, condición 3.4</span>
       <h1>Revisión del precio del transporte por gasóleo</h1>
     </div>
-    <p class="lede">Calcula la variación del gasóleo (G), el coeficiente C y el porcentaje que debe subir o bajar el precio pactado, con los precios semanales que publica el Ministerio de Transportes. Cada precio puede ser el de una fecha o la media de un mes.</p>
   </header>
 
   <section class="status" aria-label="Estado de los datos">
-    <div class="facts">
-      <div class="fact"><b id="stFile">—</b><span>Excel del Ministerio en uso</span></div>
-      <div class="fact"><b id="stLast">—</b><span>Última semana con precio</span></div>
-      <div class="fact"><b id="stOrigin">—</b><span>Última comprobación en el Ministerio</span></div>
-    </div>
-    <span id="stPill" class="pill info">Comprobando…</span>
+    <div class="fact"><b id="stLast">—</b><span>Última semana con precio</span></div>
+    <span id="stPill" class="pill warn" hidden></span>
     <div class="actions">
+      <button type="button" class="btn" id="btnShareApp"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg><span>Compartir app</span></button>
       <button type="button" class="btn primary" id="btnInstall" hidden>Instalar app</button>
-      <a class="btn" id="lnkMin" href="https://www.transportes.gob.es/transporte-terrestre/servicios-al-transportista/indice-de-variacion-semanal-de-los-precios-medios-del-gasoleo-en-espana" target="_blank" rel="noopener">Abrir página oficial ↗</a>
     </div>
     <p class="msg" id="stMsg"></p>
     <p class="msg" id="installMsg" hidden></p>
@@ -328,6 +340,11 @@ tr.in-real td{background:var(--band-b)}
       <p class="hint">Herramienta orientativa y gratuita. Para un litigio o una reclamación, contrasta el resultado con la <a href="https://apps.fomento.gob.es/preciogasoleo/angular_proyecto/client/gasoleoCambio" target="_blank" rel="noopener">calculadora oficial del Ministerio</a>.</p>
     </div>
   </details>
+  <section class="datos" aria-label="Origen de los datos">
+    <div class="fact"><b id="stFile">—</b><span>Excel del Ministerio en uso</span></div>
+    <div class="fact"><b id="stOrigin">—</b><span>Última comprobación en el Ministerio</span></div>
+    <a id="lnkMin" href="https://www.transportes.gob.es/transporte-terrestre/servicios-al-transportista/indice-de-variacion-semanal-de-los-precios-medios-del-gasoleo-en-espana" target="_blank" rel="noopener">Abrir página oficial ↗</a>
+  </section>
   <footer class="foot">
     <span>Una herramienta de <b>Grupo Trimodos</b> · Stinsa · Transargi</span>
     <a href="https://www.grupotrimodos.com/" target="_blank" rel="noopener">grupotrimodos.com</a>
@@ -369,6 +386,8 @@ const TX={
   copied:"Imagen copiada. Pégala con Ctrl+V (⌘+V en Mac) en el chat de WhatsApp Web.",download:"Descargar la imagen",
   copied:"Imagen copiada. Pégala con Ctrl+V (⌘+V en Mac) en el chat de WhatsApp Web.",download:"Descargar la imagen",shareFail:m=>"No se pudo preparar la imagen ("+m+").",file:"revision-gasoleo.png",
   title:"Revisión por gasóleo · Grupo Trimodos",
+  appText:"Calculadora de la revisión del precio del transporte por la variación del gasóleo, con los precios semanales del Ministerio de Transportes.",
+  linkCopied:"Enlace a la app copiado. Pégalo donde quieras compartirlo.",infoT:"Qué calcula esta herramienta",
   install:"Instalar app",installed:"App instalada. La encontrarás junto a tus otras aplicaciones.",
   iosHelp:"Para instalarla en el iPhone o iPad: pulsa el botón Compartir de Safari (el cuadrado con la flecha) y elige «Añadir a pantalla de inicio».",
   offline:"Sin conexión: se muestran los últimos precios descargados.",
@@ -402,6 +421,8 @@ const TX={
   copied:"Image copied. Paste it with Ctrl+V (⌘+V on a Mac) into the WhatsApp Web chat.",download:"Download the image",
   copied:"Image copied. Paste it with Ctrl+V (⌘+V on a Mac) into the WhatsApp Web chat.",download:"Download the image",shareFail:m=>"The image could not be prepared ("+m+").",file:"diesel-price-revision.png",
   title:"Diesel Price Revision · Grupo Trimodos",
+  appText:"Calculator for revising haulage prices when the price of diesel changes, using the Spanish Ministry of Transport's weekly prices.",
+  linkCopied:"Link to the app copied. Paste it wherever you want to share it.",infoT:"What this tool calculates",
   install:"Install app",installed:"App installed. You will find it with your other apps.",
   iosHelp:"To install it on an iPhone or iPad: tap Safari's Share button (the square with the arrow) and choose “Add to Home Screen”.",
   offline:"Offline: showing the latest downloaded prices.",
@@ -411,9 +432,10 @@ const TX={
 const STATIC_EN=[
  ["header.top .eyebrow","Spanish Law 15/2009, art. 38 · Order FOM/1882/2012, condition 3.4"],
  ["header.top h1","Haulage price revision for diesel price changes"],
- ["header.top .lede","Calculates the change in the diesel price (G), the coefficient C and the percentage by which the agreed haulage price must rise or fall, using the weekly prices published by the Spanish Ministry of Transport. Each price can be the one for a date or the average for a month."],
+ ["#infoPop p","Calculates the change in the diesel price (G), the coefficient C and the percentage by which the agreed haulage price must rise or fall, using the weekly prices published by the Spanish Ministry of Transport. Each price can be the one for a date or the average for a month."],
+ ["#btnInfo","@aria:What this tool calculates"],["#btnShareApp span","Share app"],[".datos","@aria:Data source"],
  [".status","@aria:Data status"],
- [".fact:nth-child(1) span","Ministry spreadsheet in use"],[".fact:nth-child(2) span","Latest week with a price"],[".fact:nth-child(3) span","Last check with the Ministry"],
+ [".status .fact span","Latest week with a price"],[".datos .fact:nth-child(1) span","Ministry spreadsheet in use"],[".datos .fact:nth-child(2) span","Last check with the Ministry"],
  ["#lnkMin","Open official page ↗"],["#btnInstall","Install app"],
  ["#pRef .tag","Reference"],["#hRef","Contract date"],["#pReal .tag","Calculation"],["#hReal","Date of carriage"],
  ["#pRef .seg","@aria:Reference mode"],["#pReal .seg","@aria:Calculation mode"],
@@ -457,7 +479,7 @@ function applyStatic(){
       if(!ES_ORIG.has(k))ES_ORIG.set(k,el.innerHTML);el.innerHTML=LANG==="en"?en:ES_ORIG.get(k);
     });
   }
-  document.documentElement.lang=LANG==="en"?"en-GB":"es-ES";document.title=L.title;
+  document.documentElement.lang=LANG==="en"?"en-GB":"es-ES";document.title=L.title;$("btnInfo").title=L.infoT;
   document.querySelectorAll(".brand .lang button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.lang===LANG)));
 }
 
@@ -656,8 +678,8 @@ function renderStatus(){
   const p=$("stPill"),msg=$("stMsg");
   // El Ministerio publica una vez por semana y la tarea de GitHub la carga de miércoles a viernes.
   // Solo se avisa si han pasado más de 17 días desde la última semana con precio: eso indica que la carga automática ha fallado.
-  if(Date.now()>lastRow().ms+17*DAY){p.className="pill warn";p.textContent=L.stLate;msg.innerHTML=L.msgLate(fmtDate(lastRow().ms),MIN_URL);}
-  else{p.className="pill ok";p.textContent=L.stAuto;msg.textContent="";}
+  if(Date.now()>lastRow().ms+17*DAY){p.hidden=false;p.textContent=L.stLate;msg.innerHTML=L.msgLate(fmtDate(lastRow().ms),MIN_URL);}
+  else{p.hidden=true;msg.textContent="";}
 }
 applyStatic();sync();drawCTables();renderStatus();calc();
 
@@ -685,6 +707,20 @@ async function comprobar(){
   renderStatus();if(nuevo)calc();
 }
 comprobar();
+
+// ---- Información (bocadillo) ----
+const pop=$("infoPop"),bInfo=$("btnInfo");
+const cerrarInfo=()=>{pop.hidden=true;bInfo.setAttribute("aria-expanded","false")};
+bInfo.addEventListener("click",e=>{e.stopPropagation();const abrir=pop.hidden;pop.hidden=!abrir;bInfo.setAttribute("aria-expanded",String(abrir))});
+document.addEventListener("click",e=>{if(!pop.hidden&&!pop.contains(e.target))cerrarInfo()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!pop.hidden){cerrarInfo();bInfo.focus()}});
+// ---- Compartir la app ----
+$("btnShareApp").addEventListener("click",async()=>{
+  const url=location.origin+location.pathname+(LANG==="en"?"?lang=en":""),msg=$("installMsg");
+  if(navigator.share){try{await navigator.share({title:L.title,text:L.appText,url});return}catch(e){if(e&&e.name==="AbortError")return}}
+  try{await navigator.clipboard.writeText(url);msg.textContent=L.linkCopied}catch(e){msg.textContent=url}
+  msg.hidden=false;
+});
 // ---- App instalable (PWA) ----
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 const STANDALONE=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
