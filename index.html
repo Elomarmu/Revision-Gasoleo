@@ -58,9 +58,13 @@ h3{font-size:17px}
 .brand .units img{height:30px;width:auto}
 .brand .units .sep{width:1px;height:30px;background:#dcdfd8}
 .brand .alt{font-family:var(--f-display);font-weight:800;color:#1d1d1b;font-size:18px;letter-spacing:.02em}
+.brand .lang{display:inline-flex;border:1px solid #dcdfd8;border-radius:6px;overflow:hidden;height:28px}
+.brand .lang button{border:0;border-radius:0;background:#fff;color:#1d1d1b;font:700 13px/1 var(--f-body);padding:0 11px;height:100%;cursor:pointer}
+.brand .lang button[aria-pressed="true"]{background:#1d1d1b;color:#fff}
+.brand .lang button:focus-visible{outline:2px solid #00857a;outline-offset:-2px}
 .foot{display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:14px}
 .foot b{font-family:var(--f-display);color:var(--ink)}
-@media (max-width:520px){.brand-in{justify-content:center}.brand .gt{height:36px}.brand .units img{height:24px}.brand .units{gap:12px}}
+@media (max-width:520px){.brand-in{justify-content:center;position:relative;padding-top:20px}.brand .lang{position:absolute;top:8px;right:max(12px,env(safe-area-inset-right,0px));height:24px}.brand .lang button{padding:0 8px;font-size:12px}.brand .gt{height:36px}.brand .units img{height:24px}.brand .units{gap:12px}}
 .mono,.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 p{margin:0}
 a{color:var(--accent)}
@@ -179,6 +183,9 @@ tr.in-real td{background:var(--band-b)}
       <a href="https://www.grupotrimodos.com/stinsa" target="_blank" rel="noopener" aria-label="STINSA"><img src="img/stinsa.png" alt="Stinsa" width="107" height="30" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'alt',textContent:'STINSA'}))"></a>
       <span class="sep" aria-hidden="true"></span>
       <a href="https://www.grupotrimodos.com/transargi" target="_blank" rel="noopener" aria-label="TRANSARGI"><img src="img/transargi.png" alt="Transargi" width="131" height="30" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'alt',textContent:'TRANSARGI'}))"></a>
+    </div>
+    <div class="lang" role="group" aria-label="Idioma / Language">
+      <button type="button" data-lang="es" aria-pressed="true" title="Español (España)">ES</button><button type="button" data-lang="en" aria-pressed="false" title="English (UK)">EN</button>
     </div>
   </div>
 </div>
@@ -325,6 +332,122 @@ tr.in-real td{background:var(--band-b)}
 <script>
 (async function(){
 "use strict";
+
+// ---- Idiomas: español (España) e inglés (Reino Unido) ----
+const TX={
+ es:{loc:"es-ES",pct:" %",
+  loadFail:m=>"No se pudieron cargar los precios ("+m+"). Recarga la página en unos segundos.",noData:"Sin datos",
+  wNoMonth:"El Ministerio no tiene precios publicados para ese mes.",wNoDate:"El Ministerio aún no ha publicado ningún precio en esa fecha o después.",
+  wDate:d=>"Precio del "+d+" (primera fecha publicada igual o posterior)",
+  wMonth:(n,mes,l)=>"Media de "+n+(n===1?" semana":" semanas")+" de "+mes+": "+l,monthOf:(m,y)=>m+" de "+y,
+  wIncomplete:" · El mes aún no está completo en la Excel.",
+  cMan:"Fijado a mano",cFixed:"Coeficiente fijo anterior · verifícalo",
+  newPrice:v=>"Nuevo precio: "+v+" €",
+  fNoRound:g=>"Sin redondear (G = "+g+") · ",fRound:g=>"G sin redondear "+g+" · ",
+  vMissing:"Faltan datos para calcular",vCont:"Revisión obligatoria: contrato continuado",vThr:t=>"Revisión obligatoria: |G| ≥ "+t,vBelow:t=>"Por debajo del umbral del "+t+": no es obligatoria",
+  hintAuto:b=>"Precio usado para G: "+b+", según la fecha de realización del transporte.",hintMan:b=>"Precio para G elegido a mano: "+b+".",
+  weekly:b=>b+" semanal (€/l)",
+  basis:{pmed:"Pmed",pai:"PAI",pvpsin:"PVP sin IVA",pvp:"PVP"},mmaGe:"MMA ≥ 7,5 t",mmaLt:"MMA < 7,5 t",
+  months:["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"],
+  mShort:["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"],
+  ct:{A:"A · ≥ 20 t",B:"B · 3,5–20 t",C:"C · Obras",D:"D · ≤ 3,5 t"},
+  wedFri:"Miércoles a viernes",stLate:"Actualización retrasada",
+  msgLate:(d,u)=>"La última semana con precio es del "+d+" y debería haber datos más recientes. Hasta que se resuelva, comprueba los precios en la <a href=\""+u+"\" target=\"_blank\" rel=\"noopener\">página oficial</a>.",
+  stAuto:"Actualización automática",msgAuto:"Los precios se cargan solos desde la Excel del Ministerio, que se publica una vez por semana.",
+  noPrice:"Sin precio publicado",pubOn:d=>"Precio publicado el "+d,avgN:n=>"Media de "+n+(n===1?" semana":" semanas"),
+  imT1:"Revisión del precio del",imT2:"transporte por gasóleo",imVeh:"Vehículo",imUsed:b=>"Precio del gasóleo usado: "+b+" · €/litro",
+  imRef:"REFERENCIA · CONTRATO",imReal:"CÁLCULO · TRANSPORTE",unit:"€/litro",imBig:"VARIACIÓN DEL PRECIO DEL TRANSPORTE",imG:"VARIACIÓN DEL GASÓLEO (G)",imC:"COEFICIENTE C",
+  imFoot:d=>"Precios: Ministerio de Transportes (Excel del "+d+") · Ley 15/2009, art. 38 · Cálculo orientativo",
+  txt:(a,b,c,d,e,f,g,h)=>`Revisión del precio del transporte por gasóleo\nReferencia (${a}): ${b} €/l\nCálculo (${c}): ${d} €/l\nVariación del gasóleo (G): ${e}\nCoeficiente C: ${f}\nVariación del transporte: ${g}\n${h}`,
+  needDates:"Completa las fechas para tener un resultado que compartir.",preparing:"Preparando…",shareBtn:"Compartir resultado",shareTitle:"Revisión del precio por gasóleo",
+  dlCopied:"Imagen descargada y resumen copiado. Adjunta la imagen en WhatsApp.",dl:"Imagen descargada. Adjúntala en WhatsApp.",
+  copied:"Imagen copiada. Pégala con Ctrl+V (⌘+V en Mac) en el chat de WhatsApp Web.",download:"Descargar la imagen",
+  copied:"Imagen copiada. Pégala con Ctrl+V (⌘+V en Mac) en el chat de WhatsApp Web.",download:"Descargar la imagen",shareFail:m=>"No se pudo preparar la imagen ("+m+").",file:"revision-gasoleo.png",
+  title:"Revisión por gasóleo · Grupo Trimodos"},
+ en:{loc:"en-GB",pct:"%",
+  loadFail:m=>"The prices could not be loaded ("+m+"). Reload the page in a few seconds.",noData:"No data",
+  wNoMonth:"The Ministry has not published any prices for that month.",wNoDate:"The Ministry has not yet published a price on or after that date.",
+  wDate:d=>"Price of "+d+" (first published date on or after it)",
+  wMonth:(n,mes,l)=>"Average of "+n+(n===1?" week":" weeks")+" in "+mes+": "+l,monthOf:(m,y)=>m+" "+y,
+  wIncomplete:" · The month is not yet complete in the spreadsheet.",
+  cMan:"Set manually",cFixed:"Previous fixed coefficient · please check",
+  newPrice:v=>"New price: €"+v,
+  fNoRound:g=>"Not rounded (G = "+g+") · ",fRound:g=>"G before rounding "+g+" · ",
+  vMissing:"Not enough data to calculate",vCont:"Revision required: continuous contract",vThr:t=>"Revision required: |G| ≥ "+t,vBelow:t=>"Below the "+t+" threshold: not required",
+  hintAuto:b=>"Price used for G: "+b+", based on the date of carriage.",hintMan:b=>"Price for G chosen manually: "+b+".",
+  weekly:b=>"Weekly "+b+" (€/l)",
+  basis:{pmed:"Pmed",pai:"Pre-tax price",pvpsin:"Pump price excl. VAT",pvp:"Pump price"},mmaGe:"MAM ≥ 7.5 t",mmaLt:"MAM < 7.5 t",
+  months:["January","February","March","April","May","June","July","August","September","October","November","December"],
+  mShort:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+  ct:{A:"A · ≥ 20 t",B:"B · 3.5–20 t",C:"C · Construction",D:"D · ≤ 3.5 t"},
+  wedFri:"Wednesday to Friday",stLate:"Update delayed",
+  msgLate:(d,u)=>"The latest week with a price is "+d+" and newer data should be available. Until this is resolved, check the prices on the <a href=\""+u+"\" target=\"_blank\" rel=\"noopener\">official page</a>.",
+  stAuto:"Automatic updates",msgAuto:"Prices are loaded automatically from the Ministry spreadsheet, which is published once a week.",
+  noPrice:"No published price",pubOn:d=>"Price published on "+d,avgN:n=>"Average of "+n+(n===1?" week":" weeks"),
+  imT1:"Haulage price revision",imT2:"for diesel price changes",imVeh:"Vehicle",imUsed:b=>"Diesel price used: "+b+" · €/litre",
+  imRef:"REFERENCE · CONTRACT",imReal:"CALCULATION · CARRIAGE",unit:"€/litre",imBig:"CHANGE IN HAULAGE PRICE",imG:"CHANGE IN DIESEL PRICE (G)",imC:"COEFFICIENT C",
+  imFoot:d=>"Prices: Spanish Ministry of Transport (spreadsheet of "+d+") · Law 15/2009, art. 38 · For guidance only",
+  txt:(a,b,c,d,e,f,g,h)=>`Haulage price revision for diesel price changes\nReference (${a}): €${b}/l\nCalculation (${c}): €${d}/l\nChange in diesel price (G): ${e}\nCoefficient C: ${f}\nChange in haulage price: ${g}\n${h}`,
+  needDates:"Fill in the dates to get a result to share.",preparing:"Preparing…",shareBtn:"Share result",shareTitle:"Haulage price revision for diesel",
+  dlCopied:"Image downloaded and summary copied. Attach the image in WhatsApp.",dl:"Image downloaded. Attach it in WhatsApp.",
+  copied:"Image copied. Paste it with Ctrl+V (⌘+V on a Mac) into the WhatsApp Web chat.",download:"Download the image",
+  copied:"Image copied. Paste it with Ctrl+V (⌘+V on a Mac) into the WhatsApp Web chat.",download:"Download the image",shareFail:m=>"The image could not be prepared ("+m+").",file:"diesel-price-revision.png",
+  title:"Diesel Price Revision · Grupo Trimodos"}
+};
+// Textos fijos de la página: [selector, contenido en inglés] (el español es el del propio HTML)
+const STATIC_EN=[
+ ["header.top .eyebrow","Spanish Law 15/2009, art. 38 · Order FOM/1882/2012, condition 3.4"],
+ ["header.top h1","Haulage price revision for diesel price changes"],
+ ["header.top .lede","Calculates the change in the diesel price (G), the coefficient C and the percentage by which the agreed haulage price must rise or fall, using the weekly prices published by the Spanish Ministry of Transport. Each price can be the one for a date or the average for a month."],
+ [".status","@aria:Data status"],
+ [".fact:nth-child(1) span","Ministry spreadsheet in use"],[".fact:nth-child(2) span","Latest week with a price"],[".fact:nth-child(3) span","Last data load"],
+ ["#lnkMin","Open official page ↗"],
+ ["#pRef .tag","Reference"],["#hRef","Contract date"],["#pReal .tag","Calculation"],["#hReal","Date of carriage"],
+ ["#pRef .seg","@aria:Reference mode"],["#pReal .seg","@aria:Calculation mode"],
+ [".seg button[data-mode=date]","Date"],[".seg button[data-mode=month]","Month"],
+ ["[data-for=date] label","Date"],["[data-for=month] label","Month"],[".readout .unit","€/litre"],
+ ["#hSet","Vehicle and contract"],["label[for=veh]","Vehicle type"],
+ ["#veh option[value=A]","A · MAM ≥ 20,000 kg (except construction)"],["#veh option[value=B]","B · MAM 3,500–20,000 kg (except construction)"],
+ ["#veh option[value=C]","C · Construction vehicles, MAM &gt; 3,500 kg"],["#veh option[value=D]","D · MAM ≤ 3,500 kg"],
+ ["label[for=basis]","Price used to calculate G"],
+ ["#basis option[value=auto]","Automatic, based on date of carriage"],["#basis option[value=pmed]","Pmed (pump price excl. VAT and professional diesel refund)"],
+ ["#basis option[value=pai]","Pre-tax price (PAI)"],["#basis option[value=pvpsin]","Pump price excl. VAT"],["#basis option[value=pvp]","Pump price"],
+ ["label[for=price]","Agreed haulage price (€)"],["label[for=thr]","Revision threshold (%)"],["label[for=rnd]","Rounding of G (decimal places of the %)"],
+ ["#rnd option[value=none]","No rounding"],["#rnd option[value='0']","0 decimal places (43%)"],["#rnd option[value='1']","1 decimal place (42.6%)"],
+ ["#rnd option[value='2']","2 decimal places (42.57%)"],["#rnd option[value='3']","3 decimal places (42.573%)"],["#rnd option[value='4']","4 decimal places (42.5731%)"],
+ ["#gp","@tail:Vehicle with MAM ≥ 7.5 t (eligible for professional diesel refund)"],["#cont","@tail:Continuous haulage contract (revised at each billing period)"],
+ ["#cMan","@tail:Set C manually"],["label[for=cVal]","Coefficient C"],
+ ["#hRes","Result"],[".result .row > div:nth-child(1) .k","Change in haulage price"],[".result .row > div:nth-child(2) .k","Change in diesel price (G)"],
+ [".result .row > div:nth-child(3) .k","Coefficient C"],[".result .row > div:nth-child(4) .k","Amount to revise (ΔP)"],
+ ["#btnShare","Share result"],
+ ["#hChart","Trend in the price used for G"],[".legend > span:nth-child(2)","@tail:Reference"],[".legend > span:nth-child(3)","@tail:Carriage"],
+ ["#svg","@aria:Chart of the weekly diesel price"],
+ ["details:nth-of-type(1) summary","Weeks used"],
+ ["#tbl thead","<tr><th>Week (Monday)</th><th>Pump price</th><th>Excl. VAT</th><th>Hydrocarbon tax</th><th>Pre-tax (PAI)</th><th>Prof. refund</th><th>Pmed ≥ 7.5 t</th><th>Pmed &lt; 7.5 t</th></tr>"],
+ ["details:nth-of-type(2) summary","How it is calculated"],
+ [".notes > p:nth-of-type(1)","ΔP = G × P × C / 100 &nbsp;·&nbsp; G = (P<sub>calculation</sub> − P<sub>reference</sub>) / P<sub>reference</sub> × 100"],
+ [".notes > p:nth-of-type(2)","G is rounded to the chosen number of decimal places (round half up) before being multiplied by C. That rounded G is also the one compared with the threshold."],
+ [".notes ul","<li><b>Single date:</b> the price for the first date in the spreadsheet on or after the chosen day. <b>Month:</b> simple average of the weeks whose date in the Ministry spreadsheet falls in that month.</li><li><b>Price for G (automatic):</b> carriage from 16/04/2026, Pmed (pump price excl. VAT and, for MAM ≥ 7.5 t, excluding the professional diesel refund); from 22/03 to 15/04/2026, pre-tax price; earlier, pump price.</li><li><b>Coefficient C:</b> from 01/07/2026 (Royal Decree-law 18/2026) based on the Pmed at the time of carriage; from 16/04 to 30/06/2026 (Royal Decree-law 9/2026) based on the pre-tax price; earlier, a fixed coefficient per vehicle. If the carriage is entered by month, that month's average is used.</li><li>Revision is mandatory when |G| ≥ 5% or a lower threshold agreed in writing, and always in continuous contracts at each billing period. Extraordinary diesel subsidies may not be taken into account.</li>"],
+ [".ctable table:nth-child(1) th","RDL 18/2026 · Pmed (€/l)"],[".ctable table:nth-child(2) th","RDL 9/2026 · Pre-tax price (€/l)"],
+ [".notes .hint","For guidance only and free of charge. For a dispute or claim, check the result against the <a href=\"https://apps.fomento.gob.es/preciogasoleo/angular_proyecto/client/gasoleoCambio\" target=\"_blank\" rel=\"noopener\">Ministry's official calculator</a>."],
+ [".foot > span","A tool by <b>Grupo Trimodos</b> · Stinsa · Transargi"]
+];
+let LANG=(()=>{try{const q=new URLSearchParams(location.search).get("lang");if(q==="en"||q==="es")return q;const v=localStorage.getItem("gasoleo-lang");if(v==="en"||v==="es")return v}catch(e){}return /^es\b/i.test(navigator.language||"es")?"es":"en"})();
+let L=TX[LANG];
+const ES_ORIG=new Map();
+function applyStatic(){
+  for(const[sel,en]of STATIC_EN){
+    document.querySelectorAll(sel).forEach((el,i)=>{
+      const k=sel+"#"+i;
+      if(en.startsWith("@aria:")){if(!ES_ORIG.has(k))ES_ORIG.set(k,el.getAttribute("aria-label"));el.setAttribute("aria-label",LANG==="en"?en.slice(6):ES_ORIG.get(k));return}
+      if(en.startsWith("@tail:")){const n=sel.startsWith("#")?el.nextSibling:el.lastChild;if(!n)return;if(!ES_ORIG.has(k))ES_ORIG.set(k,n.textContent);n.textContent=LANG==="en"?" "+en.slice(6).trim():ES_ORIG.get(k);return}
+      if(!ES_ORIG.has(k))ES_ORIG.set(k,el.innerHTML);el.innerHTML=LANG==="en"?en:ES_ORIG.get(k);
+    });
+  }
+  document.documentElement.lang=LANG==="en"?"en-GB":"es-ES";document.title=L.title;
+  document.querySelectorAll(".brand .lang button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.lang===LANG)));
+}
+
 const MIN_URL="https://www.transportes.gob.es/transporte-terrestre/servicios-al-transportista/indice-de-variacion-semanal-de-los-precios-medios-del-gasoleo-en-espana";
 const $=id=>document.getElementById(id);
 const DAY=864e5, EPOCH=Date.UTC(1899,11,30);
@@ -332,7 +455,8 @@ const serialToMs=s=>EPOCH+s*DAY;
 const isoToMs=s=>{if(!s)return NaN;const[y,m,d]=s.split("-").map(Number);return Date.UTC(y,m-1,d)};
 const msToIso=ms=>new Date(ms).toISOString().slice(0,10);
 const fmtDate=ms=>{const d=new Date(ms);return String(d.getUTCDate()).padStart(2,"0")+"/"+String(d.getUTCMonth()+1).padStart(2,"0")+"/"+d.getUTCFullYear()};
-const nf=(v,d)=>v==null||!isFinite(v)?"—":v.toLocaleString("es-ES",{minimumFractionDigits:d,maximumFractionDigits:d});
+const nf=(v,d)=>v==null||!isFinite(v)?"—":v.toLocaleString(L.loc,{minimumFractionDigits:d,maximumFractionDigits:d});
+const pc=(v,d,sign)=>(sign&&v>0?"+":"")+nf(v,d)+L.pct;
 const D_RDL18=isoToMs("2026-07-01"), D_RDL9=isoToMs("2026-04-16"), D_RDL7=isoToMs("2026-03-22");
 
 // Tablas del coeficiente C
@@ -344,7 +468,7 @@ const pick=(t,v)=>{for(const[lim,c]of t)if(v<lim)return c;return t[t.length-1][1
 // ---- Datos ----
 let SEED;
 try{const r=await fetch("data.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error(r.status);SEED=await r.json()}
-catch(e){document.querySelector(".status .msg").textContent="No se pudieron cargar los precios ("+e.message+"). Recarga la página en unos segundos.";$("stPill").className="pill bad";$("stPill").textContent="Sin datos";return}
+catch(e){applyStatic();document.querySelector(".status .msg").textContent=L.loadFail(e.message);$("stPill").className="pill bad";$("stPill").textContent=L.noData;return}
 let DATA={...SEED,origin:"Ministerio de Transportes"};
 let ROWS=[];
 function loadRows(){
@@ -414,13 +538,12 @@ function sync(){
   $("cMan").checked=S.cMan;$("cManBox").hidden=!S.cMan;$("cVal").value=S.cVal;
 }
 
-const BASIS_NAME={pmed:"Pmed",pai:"PAI",pvpsin:"PVP sin IVA",pvp:"PVP"};
-const MESES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const BN=b=>L.basis[b];
 function weeksText(ws,spec){
-  if(!ws.length)return spec.mode==="month"?"El Ministerio no tiene precios publicados para ese mes.":"El Ministerio aún no ha publicado ningún precio en esa fecha o después.";
-  if(spec.mode==="date")return "Precio del "+fmtDate(ws[0].ms)+" (primera fecha publicada igual o posterior)";
-  const d=new Date(ws[0].ms),mes=MESES[d.getUTCMonth()]+" de "+d.getUTCFullYear();
-  return "Media de "+ws.length+(ws.length===1?" semana":" semanas")+" de "+mes+": "+ws.map(w=>fmtDate(w.ms).slice(0,5)).join(", ");
+  if(!ws.length)return spec.mode==="month"?L.wNoMonth:L.wNoDate;
+  if(spec.mode==="date")return L.wDate(fmtDate(ws[0].ms));
+  const d=new Date(ws[0].ms),mes=L.monthOf(L.months[d.getUTCMonth()],d.getUTCFullYear());
+  return L.wMonth(ws.length,mes,ws.map(w=>fmtDate(w.ms).slice(0,5)).join(", "));
 }
 
 let LAST={};
@@ -435,14 +558,14 @@ function calc(){
   $("refVal").textContent=nf(r.v,5);$("realVal").textContent=nf(t.v,5);
   $("refWeeks").textContent=weeksText(wr,S.ref);$("realWeeks").textContent=weeksText(wt,S.real);
   const lastData=lastRow().ms;
-  if(S.real.mode==="month"&&isFinite(tEnd)&&tEnd>lastData+6*DAY&&wt.length)$("realWeeks").textContent+=" · El mes aún no está completo en la Excel.";
+  if(S.real.mode==="month"&&isFinite(tEnd)&&tEnd>lastData+6*DAY&&wt.length)$("realWeeks").textContent+=L.wIncomplete;
 
   // C
   let C=null,cNote="";
-  if(S.cMan){C=S.cVal;cNote="Fijado a mano";}
+  if(S.cMan){C=S.cVal;cNote=L.cMan;}
   else if(isFinite(tEnd)&&tEnd>=D_RDL18){const pm=avg(wt,"pmed",ge).v;if(pm!=null){C=pick(T18[S.veh],pm);cNote="RDL 18/2026 · Pmed "+nf(pm,3)+" €/l"}}
-  else if(isFinite(tEnd)&&tEnd>=D_RDL9){const pa=avg(wt,"pai",ge).v;if(pa!=null){C=pick(T9[S.veh],pa);cNote="RDL 9/2026 · PAI "+nf(pa,3)+" €/l"}}
-  else if(isFinite(tEnd)){C=FIXED[S.veh];cNote="Coeficiente fijo anterior · verifícalo"}
+  else if(isFinite(tEnd)&&tEnd>=D_RDL9){const pa=avg(wt,"pai",ge).v;if(pa!=null){C=pick(T9[S.veh],pa);cNote="RDL 9/2026 · "+BN("pai")+" "+nf(pa,3)+" €/l"}}
+  else if(isFinite(tEnd)){C=FIXED[S.veh];cNote=L.cFixed}
 
   const G0=(r.v&&t.v!=null)?(t.v-r.v)/r.v*100:null;
   const nd=S.rnd==="none"?null:parseInt(S.rnd,10);
@@ -451,20 +574,20 @@ function calc(){
   const gd=nd==null?4:nd;
   const pct=(G!=null&&C!=null)?G*C:null;
   const dP=(pct!=null&&isFinite(S.price))?S.price*pct/100:null;
-  $("rG").textContent=G==null?"—":(G>0?"+":"")+nf(G,gd)+" %";
-  $("rGs").textContent=BASIS_NAME[basis]+(basis==="pmed"?(ge?" · MMA ≥ 7,5 t":" · MMA < 7,5 t"):"");
+  $("rG").textContent=G==null?"—":pc(G,gd,true);
+  $("rGs").textContent=BN(basis)+(basis==="pmed"?" · "+(ge?L.mmaGe:L.mmaLt):"");
   $("rC").textContent=C==null?"—":nf(C,2);$("rCs").textContent=cNote;
-  $("rPct").textContent=pct==null?"—":(pct>0?"+":"")+nf(pct,2)+" %";
-  $("rDP").textContent=dP==null?"—":(dP>0?"+":"")+nf(dP,2)+" €";
-  $("rNP").textContent=dP==null?"":"Nuevo precio: "+nf(S.price+dP,2)+" €";
-  $("rFormula").textContent=(G!=null&&C!=null)?((nd==null?"Sin redondear (G = "+nf(G0,6)+" %) · ":"G sin redondear "+nf(G0,6)+" % · ")+"ΔP = "+nf(G,gd)+" × "+(isFinite(S.price)?nf(S.price,2):"P")+" × "+nf(C,2)+" / 100"):"";
+  $("rPct").textContent=pct==null?"—":pc(pct,2,true);
+  $("rDP").textContent=dP==null?"—":(LANG==="en"?(dP>0?"+":dP<0?"−":"")+"€"+nf(Math.abs(dP),2):(dP>0?"+":"")+nf(dP,2)+" €");
+  $("rNP").textContent=dP==null?"":L.newPrice(nf(S.price+dP,2));
+  $("rFormula").textContent=(G!=null&&C!=null)?((nd==null?L.fNoRound(pc(G0,6)):L.fRound(pc(G0,6)))+"ΔP = "+nf(G,gd)+" × "+(isFinite(S.price)?nf(S.price,2):"P")+" × "+nf(C,2)+" / 100"):"";
   const v=$("rVerdict"),thr=isFinite(S.thr)?S.thr:5;
-  if(G==null){v.className="pill info";v.textContent="Faltan datos para calcular"}
-  else if(S.cont){v.className="pill ok";v.textContent="Revisión obligatoria: contrato continuado"}
-  else if(Math.abs(G)>=thr){v.className="pill ok";v.textContent="Revisión obligatoria: |G| ≥ "+nf(thr,1)+" %"}
-  else{v.className="pill warn";v.textContent="Por debajo del umbral del "+nf(thr,1)+" %: no es obligatoria"}
-  $("basisHint").textContent=S.basis==="auto"?("Precio usado para G: "+BASIS_NAME[basis]+", según la fecha de realización del transporte."):"Precio para G elegido a mano: "+BASIS_NAME[basis]+".";
-  $("lgSeries").textContent=BASIS_NAME[basis]+" semanal (€/l)";
+  if(G==null){v.className="pill info";v.textContent=L.vMissing}
+  else if(S.cont){v.className="pill ok";v.textContent=L.vCont}
+  else if(Math.abs(G)>=thr){v.className="pill ok";v.textContent=L.vThr(pc(thr,1))}
+  else{v.className="pill warn";v.textContent=L.vBelow(pc(thr,1))}
+  $("basisHint").textContent=S.basis==="auto"?L.hintAuto(BN(basis)):L.hintMan(BN(basis));
+  $("lgSeries").textContent=L.weekly(BN(basis));
   LAST={basis,ge,wr,wt,rv:r.v,tv:t.v,G,gd,C,cNote,pct,verdict:$("rVerdict").textContent,verdictOk:$("rVerdict").className.includes("ok")};
   drawChart();drawTable();
 }
@@ -488,7 +611,7 @@ function drawChart(){
   for(let i=0;i<=4;i++){const v=lo+step*i,yy=y(v);h+=`<line x1="${m.l}" x2="${W-m.r}" y1="${yy}" y2="${yy}" stroke="var(--line)" stroke-width="1"/><text x="${m.l-6}" y="${yy+4}" text-anchor="end">${nf(v,3)}</text>`}
   const span=b-a,months=span/(30*DAY),every=months>36?12:months>14?3:months>6?2:1;
   const d0=new Date(a);let cur=Date.UTC(d0.getUTCFullYear(),d0.getUTCMonth()+1,1);
-  const MES=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+  const MES=L.mShort;
   while(cur<b){const d=new Date(cur);if(d.getUTCMonth()%every===0){const xx=x(cur);h+=`<line x1="${xx}" x2="${xx}" y1="${H-m.b}" y2="${H-m.b+4}" stroke="var(--muted)"/><text x="${xx}" y="${H-8}" text-anchor="middle">${MES[d.getUTCMonth()]} ${String(d.getUTCFullYear()).slice(2)}</text>`}cur=Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,1)}
   const path=pts.map((p,i)=>(i?"L":"M")+x(p.ms).toFixed(1)+" "+y(p.v).toFixed(1)).join(" ");
   h+=`<path d="${path} L${x(pts[pts.length-1].ms).toFixed(1)} ${H-m.b} L${x(pts[0].ms).toFixed(1)} ${H-m.b} Z" fill="var(--accent)" opacity=".08"/>`;
@@ -505,7 +628,7 @@ function drawTable(){
   $("tbl").querySelector("tbody").innerHTML=rows.map(r=>`<tr class="${set.get(r.ms)}"><td>${fmtDate(r.ms)}</td><td>${nf(r.pvp,5)}</td><td>${nf(r.pvpsin,5)}</td><td>${nf(r.ieh,5)}</td><td>${nf(r.pai,5)}</td><td>${nf(r.gp,3)}</td><td>${nf(r.pge,5)}</td><td>${nf(r.plt,5)}</td></tr>`).join("");
 }
 function drawCTables(){
-  const names={A:"A · ≥ 20 t",B:"B · 3,5–20 t",C:"C · Obras",D:"D · ≤ 3,5 t"};
+  const names=L.ct;
   const fmt=t=>t.map(([lim,c],i)=>{const prev=i?t[i-1][0]:null;return (prev==null?"< "+nf(lim,2):lim===Infinity?"≥ "+nf(prev,2):nf(prev,2)+"–"+nf(lim,2))+" → "+nf(c,1)}).join(" · ");
   $("ct18").innerHTML=Object.keys(names).map(k=>`<tr><td>${names[k]}</td><td class="mono">${fmt(T18[k])}</td></tr>`).join("");
   $("ct9").innerHTML=Object.keys(names).map(k=>`<tr><td>${names[k]}</td><td class="mono">${fmt(T9[k])}</td></tr>`).join("");
@@ -516,26 +639,29 @@ const fileDateMs=()=>isoToMs(DATA.fileDate);
 function renderStatus(){
   $("stFile").textContent=fmtDate(fileDateMs());
   $("stLast").textContent=fmtDate(lastRow().ms);
-  $("stOrigin").textContent=DATA.checkedAt?new Date(DATA.checkedAt).toLocaleDateString("es-ES"):"Miércoles a viernes";
+  $("stOrigin").textContent=DATA.checkedAt?fmtDate(DATA.checkedAt):L.wedFri;
   const p=$("stPill"),msg=$("stMsg");
   // El Ministerio publica una vez por semana y la tarea de GitHub la carga de miércoles a viernes.
   // Solo se avisa si han pasado más de 17 días desde la última semana con precio: eso indica que la carga automática ha fallado.
-  if(Date.now()>lastRow().ms+17*DAY){p.className="pill warn";p.textContent="Actualización retrasada";
-    msg.innerHTML="La última semana con precio es del "+fmtDate(lastRow().ms)+" y debería haber datos más recientes. Hasta que se resuelva, comprueba los precios en la <a href=\""+MIN_URL+"\" target=\"_blank\" rel=\"noopener\">página oficial</a>.";}
-  else{p.className="pill ok";p.textContent="Actualización automática";msg.textContent="Los precios se cargan solos desde la Excel del Ministerio, que se publica una vez por semana.";}
+  if(Date.now()>lastRow().ms+17*DAY){p.className="pill warn";p.textContent=L.stLate;msg.innerHTML=L.msgLate(fmtDate(lastRow().ms),MIN_URL);}
+  else{p.className="pill ok";p.textContent=L.stAuto;msg.textContent=L.msgAuto;}
 }
-sync();drawCTables();renderStatus();calc();
+applyStatic();sync();drawCTables();renderStatus();calc();
+document.querySelectorAll(".brand .lang button").forEach(b=>b.addEventListener("click",()=>{
+  if(b.dataset.lang===LANG)return;LANG=b.dataset.lang;L=TX[LANG];try{localStorage.setItem("gasoleo-lang",LANG)}catch(e){}
+  $("shareMsg").textContent="";applyStatic();drawCTables();renderStatus();calc();
+}));
 
 // ---- Compartir el resultado como imagen ----
 function specLabel(spec){
   if(spec.mode==="date")return fmtDate(isoToMs(spec.date));
   if(!/^\d{4}-\d{2}$/.test(spec.month||""))return "—";
-  const[y,m]=spec.month.split("-").map(Number);return MESES[m-1].charAt(0).toUpperCase()+MESES[m-1].slice(1)+" "+y;
+  const[y,m]=spec.month.split("-").map(Number);return L.months[m-1].charAt(0).toUpperCase()+L.months[m-1].slice(1)+" "+y;
 }
 function specDetail(ws,spec){
-  if(!ws.length)return "Sin precio publicado";
-  if(spec.mode==="date")return "Precio publicado el "+fmtDate(ws[0].ms);
-  return "Media de "+ws.length+(ws.length===1?" semana":" semanas");
+  if(!ws.length)return L.noPrice;
+  if(spec.mode==="date")return L.pubOn(fmtDate(ws[0].ms));
+  return L.avgN(ws.length);
 }
 function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
 function fitText(ctx,txt,maxW,size,weight,family){let s=size;do{ctx.font=`${weight} ${s}px ${family}`;s-=2}while(ctx.measureText(txt).width>maxW&&s>12);return txt}
@@ -556,11 +682,11 @@ async function imagenResultado(){
   if(st){x.fillStyle="#dcdfd8";x.fillRect(rx-26,62,2,56);const w=st.naturalWidth*54/st.naturalHeight;rx-=w+52;draw(st,54,rx,63)}
   [[SUN,0],["#009f92",1],["#f17e49",2]].forEach(([col,i])=>{x.fillStyle=col;x.fillRect(i*W/3,180,W/3+1,12)});
   // Título
-  x.fillStyle=INK;x.font=`800 54px ${DISP}`;x.fillText("Revisión del precio del",60,290);x.fillText("transporte por gasóleo",60,354);
-  const veh=$("veh").options[$("veh").selectedIndex].text.replace(" · "," · Vehículo ");
+  x.fillStyle=INK;x.font=`800 54px ${DISP}`;x.fillText(L.imT1,60,290);x.fillText(L.imT2,60,354);
+  const veh=$("veh").options[$("veh").selectedIndex].text.replace(" · "," · "+L.imVeh+" ");
   x.fillStyle=MUT;fitText(x,veh,W-120,28,600,BODY);x.fillText(veh,60,410);
-  const bas=BASIS_NAME[LAST.basis]+(LAST.basis==="pmed"?(LAST.ge?" (MMA ≥ 7,5 t)":" (MMA < 7,5 t)"):"");
-  x.font=`500 26px ${BODY}`;x.fillText("Precio del gasóleo usado: "+bas+" · €/litro",60,450);
+  const bas=BN(LAST.basis)+(LAST.basis==="pmed"?" ("+(LAST.ge?L.mmaGe:L.mmaLt)+")":"");
+  x.font=`500 26px ${BODY}`;const usd=L.imUsed(bas);fitText(x,usd,W-120,26,500,BODY);x.fillText(usd,60,450);
   // Tarjetas de precio
   const card=(cx,tag,tagCol,tagBg,label,val,detail)=>{
     const y=490,w=465,h=270;
@@ -569,58 +695,71 @@ async function imagenResultado(){
     x.fillStyle=tagBg;roundRect(x,cx+30,y+30,tw+28,40,8);x.fill();x.fillStyle=tagCol;x.fillText(tag,cx+44,y+58);
     x.fillStyle=INK;fitText(x,label,w-60,34,800,DISP);x.fillText(label,cx+30,y+122);
     x.font=`500 60px ${MONO}`;x.fillText(val,cx+30,y+200);const vw=x.measureText(val).width;
-    x.fillStyle=MUT;x.font=`500 24px ${BODY}`;x.fillText("€/litro",cx+40+vw,y+200);
+    x.fillStyle=MUT;x.font=`500 24px ${BODY}`;x.fillText(L.unit,cx+40+vw,y+200);
     x.fillStyle=MUT;x.font=`500 24px ${BODY}`;x.fillText(detail,cx+30,y+242);
   };
-  card(60,"REFERENCIA · CONTRATO",GREEN,"rgba(0,159,146,.16)",specLabel(S.ref),nf(LAST.rv,5),specDetail(LAST.wr,S.ref));
-  card(555,"CÁLCULO · TRANSPORTE",ORANGE,"rgba(241,126,73,.22)",specLabel(S.real),nf(LAST.tv,5),specDetail(LAST.wt,S.real));
+  card(60,L.imRef,GREEN,"rgba(0,159,146,.16)",specLabel(S.ref),nf(LAST.rv,5),specDetail(LAST.wr,S.ref));
+  card(555,L.imReal,ORANGE,"rgba(241,126,73,.22)",specLabel(S.real),nf(LAST.tv,5),specDetail(LAST.wt,S.real));
   // Resultado
   const ry=800,rh=380;
   x.fillStyle=INK;roundRect(x,60,ry,W-120,rh,26);x.fill();
   x.save();roundRect(x,60,ry,W-120,rh,26);x.clip();x.fillStyle=SUN;x.fillRect(60,ry,W-120,12);x.restore();
-  x.fillStyle=SUN;x.font=`800 26px ${DISP}`;x.fillText("VARIACIÓN DEL PRECIO DEL TRANSPORTE",100,ry+72);
+  x.fillStyle=SUN;x.font=`800 26px ${DISP}`;x.fillText(L.imBig,100,ry+72);
   const sg=v=>v==null?"—":(v>0?"+":"")+nf(v,2);
-  x.fillStyle="#fff";x.font=`800 124px ${DISP}`;x.fillText(LAST.pct==null?"—":sg(LAST.pct)+" %",96,ry+196);
+  x.fillStyle="#fff";x.font=`800 124px ${DISP}`;x.fillText(LAST.pct==null?"—":pc(LAST.pct,2,true),96,ry+196);
   x.fillStyle="rgba(255,255,255,.22)";x.fillRect(100,ry+232,W-200,2);
-  x.fillStyle=SUN;x.font=`800 24px ${DISP}`;x.fillText("VARIACIÓN DEL GASÓLEO (G)",100,ry+282);x.fillText("COEFICIENTE C",620,ry+282);
-  x.fillStyle="#fff";x.font=`800 72px ${DISP}`;x.fillText(LAST.G==null?"—":(LAST.G>0?"+":"")+nf(LAST.G,LAST.gd)+" %",96,ry+354);x.fillText(LAST.C==null?"—":nf(LAST.C,2),616,ry+354);
+  x.fillStyle=SUN;x.font=`800 24px ${DISP}`;x.fillText(L.imG,100,ry+282);x.fillText(L.imC,620,ry+282);
+  x.fillStyle="#fff";x.font=`800 72px ${DISP}`;x.fillText(LAST.G==null?"—":pc(LAST.G,LAST.gd,true),96,ry+354);x.fillText(LAST.C==null?"—":nf(LAST.C,2),616,ry+354);
   // Pie
   x.fillStyle=LAST.verdictOk?GREEN:ORANGE;x.font=`800 28px ${BODY}`;x.fillText(LAST.verdict,60,1232);
-  x.fillStyle=MUT;const pie="Precios: Ministerio de Transportes (Excel del "+fmtDate(fileDateMs())+") · Ley 15/2009, art. 38 · Cálculo orientativo";
+  x.fillStyle=MUT;const pie=L.imFoot(fmtDate(fileDateMs()));
   fitText(x,pie,W-120,22,500,BODY);x.fillText(pie,60,1274);
   x.fillStyle=GREEN;x.font=`700 24px ${BODY}`;x.fillText((location.host+location.pathname).replace(/\/$/,""),60,1312);
   return await new Promise(res=>c.toBlob(res,"image/png"));
 }
 function textoResultado(){
-  const sg=v=>(v>0?"+":"")+nf(v,2);
-  return `Revisión del precio del transporte por gasóleo
-Referencia (${specLabel(S.ref)}): ${nf(LAST.rv,5)} €/l
-Cálculo (${specLabel(S.real)}): ${nf(LAST.tv,5)} €/l
-Variación del gasóleo (G): ${(LAST.G>0?"+":"")+nf(LAST.G,LAST.gd)} %
-Coeficiente C: ${nf(LAST.C,2)}
-Variación del transporte: ${sg(LAST.pct)} %
-${location.href.split("#")[0]}`;
+  return L.txt(specLabel(S.ref),nf(LAST.rv,5),specLabel(S.real),nf(LAST.tv,5),pc(LAST.G,LAST.gd,true),nf(LAST.C,2),pc(LAST.pct,2,true),location.href.split("#")[0].split("?")[0]+(LANG==="en"?"?lang=en":""));
 }
+function descargar(blob){
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=L.file;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+}
+// Móvil: menú de compartir del sistema (WhatsApp, etc.).
+// Ordenador: copiar la imagen al portapapeles para pegarla con Ctrl+V. El menú de compartir de Windows
+// tiene una opción «Copiar» que no deja la imagen en el portapapeles, por eso no se usa en el ordenador.
+const ES_MOVIL=()=>matchMedia("(pointer:coarse)").matches&&/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 $("btnShare").addEventListener("click",async()=>{
   const btn=$("btnShare"),msg=$("shareMsg");msg.textContent="";
-  if(LAST.pct==null){msg.textContent="Completa las fechas para tener un resultado que compartir.";return}
-  btn.disabled=true;btn.textContent="Preparando…";
+  if(LAST.pct==null){msg.textContent=L.needDates;return}
+  btn.disabled=true;btn.textContent=L.preparing;
+  const blobP=imagenResultado();
   try{
-    const blob=await imagenResultado();
-    const file=new File([blob],"revision-gasoleo.png",{type:"image/png"});
-    if(navigator.canShare&&navigator.canShare({files:[file]})){
-      try{await navigator.share({files:[file],title:"Revisión del precio por gasóleo",text:textoResultado()});}
-      catch(e){if(e&&e.name!=="AbortError")throw e}
-    }else{
-      const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="revision-gasoleo.png";document.body.appendChild(a);a.click();a.remove();
-      setTimeout(()=>URL.revokeObjectURL(a.href),5000);
-      try{await navigator.clipboard.writeText(textoResultado());msg.textContent="Imagen descargada y resumen copiado. Adjunta la imagen en WhatsApp.";}
-      catch(e){msg.textContent="Imagen descargada. Adjúntala en WhatsApp.";}
+    if(ES_MOVIL()){
+      const blob=await blobP,file=new File([blob],L.file,{type:"image/png"});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){
+        try{await navigator.share({files:[file],title:L.shareTitle,text:textoResultado()});}
+        catch(e){if(e&&e.name!=="AbortError")throw e}
+        return;
+      }
+      descargar(blob);msg.textContent=L.dl;return;
     }
-  }catch(e){msg.textContent="No se pudo preparar la imagen ("+(e.message||e)+").";}
-  finally{btn.disabled=false;btn.textContent="Compartir resultado"}
+    let copiado=false;
+    if(navigator.clipboard&&window.ClipboardItem){
+      // El ClipboardItem se crea en el mismo clic, con la imagen aún generándose (necesario en Safari).
+      try{await navigator.clipboard.write([new ClipboardItem({"image/png":blobP})]);copiado=true}catch(e){}
+    }
+    const blob=await blobP;
+    if(copiado){
+      msg.textContent=L.copied+" ";
+      const link=document.createElement("a");link.href="#";link.textContent=L.download;link.style.color="inherit";
+      link.addEventListener("click",ev=>{ev.preventDefault();descargar(blob)});msg.appendChild(link);
+    }else{
+      descargar(blob);
+      try{await navigator.clipboard.writeText(textoResultado());msg.textContent=L.dlCopied}catch(e){msg.textContent=L.dl}
+    }
+  }catch(e){msg.textContent=L.shareFail(e.message||e);}
+  finally{btn.disabled=false;btn.textContent=L.shareBtn}
 });
-
 })();
 </script>
 </body>
