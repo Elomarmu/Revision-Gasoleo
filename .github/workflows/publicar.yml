@@ -38,7 +38,7 @@ jobs:
       - name: Preparar los ficheros de la web
         run: |
           mkdir _site
-          cp index.html data.json manifest.webmanifest sw.js _site/
+          cp index.html data.json manifest.webmanifest sw.js trimodos-loader.js _site/
           cp -r img _site/
           # Versión de pruebas, si existe
           if [ -d pruebas ]; then cp -r pruebas _site/; fi

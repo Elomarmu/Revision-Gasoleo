@@ -18,7 +18,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@600;700;800&family=Mulish:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: franja blanca de marca con los tres logotipos y raya tricolor (amarillo Trimodos, verde Stinsa, naranja Transargi), como en la app DECA; cabecera, estado, dos paneles enfrentados (referencia en verde Stinsa, cálculo en naranja Transargi), resultado en negro Trimodos con rótulos amarillos, gráfica y notas. */
-:root{
+:root{--tl-ink:var(--ink);--tl-splash-bg:var(--bg);--tl-fg:var(--ink);
   --bg:#f5f6f4; --surface:#ffffff; --sunk:#eceee9; --ink:#1d1d1b; --muted:#5f625c; --line:#dcdfd8;
   --accent:#00857a; --accent-deep:#006b62; --accent-ink:#ffffff; --amber:#c4592a; --amber-soft:#fde6da; --sun:#fcda00;
   --result-bg:#1d1d1b; --result-ink:#ffffff;
@@ -201,6 +201,8 @@ tr.in-real td{background:var(--band-b)}
 </style>
 </head>
 <body>
+<!-- Loader de marca: pantalla de inicio hasta tener los precios (ver trimodos-loader.js) -->
+<script src="trimodos-loader.js" data-wait="ready"></script>
 
 
 <div class="brand">
@@ -521,8 +523,8 @@ const pick=(t,v)=>{for(const[lim,c]of t)if(v<lim)return c;return t[t.length-1][1
 
 // ---- Datos ----
 let SEED;
-try{const r=await fetch("data.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error(r.status);SEED=await r.json()}
-catch(e){applyStatic();document.querySelector(".status .msg").textContent=L.loadFail(e.message);$("stPill").className="pill bad";$("stPill").textContent=L.noData;return}
+try{const r=await fetch("data.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error(r.status);SEED=await r.json();window.TrimodosLoader&&TrimodosLoader.ready()}
+catch(e){window.TrimodosLoader&&TrimodosLoader.ready();applyStatic();document.querySelector(".status .msg").textContent=L.loadFail(e.message);$("stPill").className="pill bad";$("stPill").textContent=L.noData;return}
 let DATA={...SEED,origin:"Ministerio de Transportes"};
 let ROWS=[];
 function loadRows(){
