@@ -93,15 +93,42 @@ def leer_excel(contenido):
     return filas
 
 
+def buscar_enlace(html):
+    """Enlace a la Excel de precios del gasóleo. El Ministerio cambia a veces el nombre
+    (p. ej. preciogasoleosemanalweb-28102026.xlsx o preciogasoleosemanalweb11-11-26.xlsx)."""
+    hrefs = re.findall(r'href="([^"]+\.xlsx?)"', html, re.I)
+    for h in hrefs:
+        if re.search(r"precio.?gasoleo", h, re.I):
+            return h
+    for h in hrefs:
+        if re.search(r"gasoleo|gasóleo", h, re.I):
+            return h
+    return hrefs[0] if len(hrefs) == 1 else None
+
+
+def fecha_del_nombre(url):
+    """Fecha de publicación a partir del nombre del fichero; si no se reconoce, la de hoy."""
+    nombre = url.rsplit("/", 1)[-1]
+    m = re.search(r"(\d{2})[-_.]?(\d{2})[-_.]?(\d{4}|\d{2})(?!\d)", nombre)
+    if m:
+        d, mth, y = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        if y < 100:
+            y += 2000
+        try:
+            return dt.date(y, mth, d).isoformat()
+        except ValueError:
+            pass
+    return dt.date.today().isoformat()
+
+
 def main():
     html = descargar(PAGINA).decode("utf-8", "replace")
-    m = re.search(r'href="([^"]*preciogasoleosemanalweb-(\d{2})(\d{2})(\d{4})\.xlsx)"', html, re.I)
-    if not m:
+    enlace = buscar_enlace(html)
+    if not enlace:
         print("No encuentro el enlace a la Excel en la página del Ministerio", file=sys.stderr)
         sys.exit(1)
-    enlace = m.group(1)
     url = enlace if enlace.startswith("http") else BASE + enlace
-    fecha_fichero = f"{m.group(4)}-{m.group(3)}-{m.group(2)}"
+    fecha_fichero = fecha_del_nombre(url)
     print("Excel publicada:", url)
 
     filas = leer_excel(descargar(url))
