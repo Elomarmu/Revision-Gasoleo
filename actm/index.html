@@ -60,7 +60,9 @@ h3{font-size:17px}
 .brand .logo{gap:16px;text-decoration:none}
 .brand .assoc{font:500 13px/1.3 var(--f-body);color:#1d1d1b;max-width:24ch;border-left:2px solid #ffc728;padding-left:14px}
 .brand .alt{font-family:var(--f-display);font-weight:800;color:#1d1d1b;font-size:18px;letter-spacing:.02em}
-.brand{position:relative}
+.brand{position:sticky;top:0;z-index:40;transition:box-shadow .2s}
+.brand.fija{box-shadow:0 2px 12px rgba(0,0,0,.12)}
+html{scroll-padding-top:96px}
 .brand .tools{display:flex;align-items:center;gap:8px}
 .info-btn{width:28px;height:28px;padding:0;border-radius:50%;border:1.5px solid #1d1d1b;background:#fff;color:#1d1d1b;font:700 15px/1 Georgia,"Times New Roman",serif;font-style:italic;justify-content:center}
 .info-btn[aria-expanded="true"]{background:#1d1d1b;color:#fff}
@@ -84,7 +86,8 @@ h3{font-size:17px}
 .brand .lang button:focus-visible{outline:2px solid #ffc728;outline-offset:-2px}
 .foot{display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:14px}
 .foot b{font-family:var(--f-display);color:var(--ink)}
-@media (max-width:520px){.brand-in{justify-content:center;padding-top:42px}.brand .tools{position:absolute;top:8px;right:max(12px,env(safe-area-inset-right,0px));gap:6px}.brand .lang{height:24px}.brand .lang button{padding:0 8px;font-size:12px}.info-btn{width:24px;height:24px;font-size:13px}.info-pop{top:40px;right:12px}.info-pop::before{right:73px}.brand .gt{height:44px}.brand .assoc{font-size:12px;padding-left:10px}.brand .logo{gap:10px}}
+@media (max-width:520px){.brand-in{flex-wrap:nowrap;padding-block:10px;gap:8px}.brand .tools{gap:6px;flex:none}html{scroll-padding-top:76px}.brand .lang{height:24px}.brand .lang button{padding:0 8px;font-size:12px}.info-btn{width:24px;height:24px;font-size:13px}.info-pop{top:calc(100% - 2px);right:12px}.info-pop::before{right:73px}.brand .gt{height:38px}.brand .assoc{font-size:10.5px;line-height:1.25;padding-left:8px;max-width:none}.brand .logo{gap:8px;min-width:0}}
+@media (max-width:374px){.brand .assoc{display:none}}
 .mono,.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 p{margin:0}
 a{color:var(--accent)}
@@ -787,6 +790,7 @@ $("btnShareApp").addEventListener("click",async()=>{
   msg.hidden=false;
 });
 // ---- App instalable (PWA) ----
+{const b=document.querySelector(".brand");const f=()=>b.classList.toggle("fija",scrollY>4);addEventListener("scroll",f,{passive:true});f()}
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 const STANDALONE=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
 const IOS=/iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
