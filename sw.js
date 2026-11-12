@@ -2,7 +2,7 @@
 // - data.json: primero la red (precios al día); sin conexión, la última copia guardada.
 // - La página: primero la red (así se ve siempre la última versión); sin conexión, la copia guardada.
 // - Imágenes, manifiesto y tipografías: se sirve la copia guardada y se actualiza por detrás.
-const VERSION = "gasoleo-v4";
+const VERSION = "gasoleo-v5";
 const BASICOS = [
   "./", "index.html", "data.json", "manifest.webmanifest", "trimodos-loader.js",
   "img/trimodos.png", "img/stinsa.png", "img/transargi.png",
@@ -16,7 +16,7 @@ self.addEventListener("install", (e) => {
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys()
-      .then((ks) => Promise.all(ks.filter((k) => k !== VERSION).map((k) => caches.delete(k))))
+      .then((ks) => Promise.all(ks.filter((k) => k.startsWith("gasoleo-") && k !== VERSION).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
@@ -47,6 +47,9 @@ self.addEventListener("fetch", (e) => {
   // La página: primero la red, para ver siempre la última versión; sin conexión, la copia guardada
   // (la misma aunque la URL lleve ?lang=en)
   if (req.mode === "navigate") {
+    // Solo la página principal: /pruebas/ y /actm/ son otras páginas (ACTM tiene su propio service worker)
+    const base = new URL("./", self.registration.scope).pathname;
+    if (url.pathname !== base && url.pathname !== base + "index.html") return;
     const pagina = new Request(new URL("./", self.registration.scope));
     e.respondWith(
       fetch(req, { cache: "no-cache" })

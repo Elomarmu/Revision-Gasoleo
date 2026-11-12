@@ -42,6 +42,8 @@ jobs:
           cp -r img _site/
           # Versión de pruebas, si existe
           if [ -d pruebas ]; then cp -r pruebas _site/; fi
+          # Versión con la marca de ACTM
+          if [ -d actm ]; then cp -r actm _site/; fi
 
       - uses: actions/upload-pages-artifact@v3
         with:
