@@ -2,7 +2,7 @@
 // - data.json: primero la red (precios al día); sin conexión, la última copia guardada.
 // - La página: primero la red (así se ve siempre la última versión); sin conexión, la copia guardada.
 // - Imágenes, manifiesto y tipografías: se sirve la copia guardada y se actualiza por detrás.
-const VERSION = "gasoleo-v5";
+const VERSION = "gasoleo-v6";
 const BASICOS = [
   "./", "index.html", "data.json", "manifest.webmanifest", "trimodos-loader.js",
   "img/trimodos.png", "img/stinsa.png", "img/transargi.png",

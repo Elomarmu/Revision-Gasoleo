@@ -63,7 +63,9 @@ h3{font-size:17px}
 .brand .alt{font-family:var(--f-display);font-weight:800;color:#1d1d1b;font-size:18px;letter-spacing:.02em}
 .beta{background:#c4592a;color:#fff;text-align:center;font:700 13px/1.4 var(--f-body);padding-block:6px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .beta a{color:#fff}
-.brand{position:relative}
+.brand{position:sticky;top:0;z-index:40;transition:box-shadow .2s}
+.brand.fija{box-shadow:0 2px 12px rgba(0,0,0,.12)}
+html{scroll-padding-top:110px}
 .brand .tools{display:flex;align-items:center;gap:8px}
 .info-btn{width:28px;height:28px;padding:0;border-radius:50%;border:1.5px solid #1d1d1b;background:#fff;color:#1d1d1b;font:700 15px/1 Georgia,"Times New Roman",serif;font-style:italic;justify-content:center}
 .info-btn[aria-expanded="true"]{background:#1d1d1b;color:#fff}
@@ -87,7 +89,7 @@ h3{font-size:17px}
 .brand .lang button:focus-visible{outline:2px solid #00857a;outline-offset:-2px}
 .foot{display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px;border-top:1px solid var(--line);padding-top:14px}
 .foot b{font-family:var(--f-display);color:var(--ink)}
-@media (max-width:520px){.brand-in{justify-content:center;padding-top:22px}.brand .tools{position:absolute;top:8px;right:max(12px,env(safe-area-inset-right,0px));gap:6px}.brand .lang{height:24px}.brand .lang button{padding:0 8px;font-size:12px}.info-btn{width:24px;height:24px;font-size:13px}.info-pop{top:40px;right:12px}.info-pop::before{right:73px}.brand .gt{height:36px}.brand .units img{height:24px}.brand .units{gap:12px}}
+@media (max-width:520px){.brand-in{display:grid;grid-template-columns:1fr auto;align-items:center;gap:6px 10px;padding-block:8px}.brand-in>a:first-child{grid-row:1;grid-column:1;justify-self:start}.brand .tools{grid-row:1;grid-column:2;gap:6px}.brand .units{grid-row:2;grid-column:1/-1;justify-content:center;gap:14px}.brand .lang{height:24px}.brand .lang button{padding:0 8px;font-size:12px}.info-btn{width:24px;height:24px;font-size:13px}.info-pop{top:calc(100% - 2px);right:12px}.info-pop::before{right:73px}.brand .gt{height:32px}.brand .units img{height:22px}.brand .units .sep{height:22px}html{scroll-padding-top:96px}}
 .mono,.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 p{margin:0}
 a{color:var(--accent)}
@@ -784,6 +786,7 @@ $("btnShareApp").addEventListener("click",async()=>{
   msg.hidden=false;
 });
 // ---- App instalable (PWA) ----
+{const b=document.querySelector(".brand");const f=()=>b.classList.toggle("fija",scrollY>4);addEventListener("scroll",f,{passive:true});f()}
 // Versión de pruebas: sin service worker ni instalación
 const STANDALONE=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
 const IOS=/iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
