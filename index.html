@@ -424,7 +424,7 @@ const TX={
   copied:"Imagen copiada. Pégala con Ctrl+V (⌘+V en Mac) en el chat de WhatsApp Web.",download:"Descargar la imagen",shareFail:m=>"No se pudo preparar la imagen ("+m+").",file:"revision-gasoleo.png",
   title:"Revisión por gasóleo · Grupo Trimodos",
   appText:"Calculadora de la revisión del precio del transporte por la variación del gasóleo, con los precios semanales del Ministerio de Transportes.",
-  linkCopied:"Enlace a la app copiado. Pégalo donde quieras compartirlo.",tapAgain:"La imagen ya está lista: vuelve a pulsar «Compartir resultado» para elegir la aplicación.",infoT:"Información legal",shareAppT:"Compartir app",
+  linkCopied:"Enlace a la app copiado. Pégalo donde quieras compartirlo.",tapAgain:"La imagen ya está lista: vuelve a pulsar «Compartir resultado» para elegir la aplicación.",tapAgainText:"Este navegador no deja compartir la imagen: vuelve a pulsar «Compartir resultado» para enviar el resultado como texto.",noShare:"Este navegador no tiene menú de compartir, así que se ha descargado la imagen. Para elegir la aplicación, abre la calculadora en Chrome (Android) o Safari (iPhone).",infoT:"Información legal",shareAppT:"Compartir app",
   install:"Instalar app",installed:"App instalada. La encontrarás junto a tus otras aplicaciones.",
   iosHelp:"Para instalarla en el iPhone o iPad: pulsa el botón Compartir de Safari (el cuadrado con la flecha) y elige «Añadir a pantalla de inicio».",
   offline:"Sin conexión: se muestran los últimos precios descargados.",
@@ -463,7 +463,7 @@ const TX={
   copied:"Image copied. Paste it with Ctrl+V (⌘+V on a Mac) into the WhatsApp Web chat.",download:"Download the image",shareFail:m=>"The image could not be prepared ("+m+").",file:"diesel-price-revision.png",
   title:"Diesel Price Revision · Grupo Trimodos",
   appText:"Calculator for revising haulage prices when the price of diesel changes, using the Spanish Ministry of Transport's weekly prices.",
-  linkCopied:"Link to the app copied. Paste it wherever you want to share it.",tapAgain:"The image is ready: tap “Share result” again to choose the app.",infoT:"Legal information",shareAppT:"Share app",
+  linkCopied:"Link to the app copied. Paste it wherever you want to share it.",tapAgain:"The image is ready: tap “Share result” again to choose the app.",tapAgainText:"This browser does not allow sharing the image: tap “Share result” again to send the result as text.",noShare:"This browser has no share menu, so the image has been downloaded. To choose the app, open the calculator in Chrome (Android) or Safari (iPhone).",infoT:"Legal information",shareAppT:"Share app",
   install:"Install app",installed:"App installed. You will find it with your other apps.",
   iosHelp:"To install it on an iPhone or iPad: tap Safari's Share button (the square with the arrow) and choose “Add to Home Screen”.",
   offline:"Offline: showing the latest downloaded prices.",
@@ -782,7 +782,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!pop.hidden){cerrar
 // ---- Compartir la app ----
 $("btnShareApp").addEventListener("click",async()=>{
   const url=location.origin+location.pathname+(LANG==="en"?"?lang=en":""),msg=$("installMsg");
-  if(navigator.share){try{await navigator.share({title:L.title,text:L.appText,url});return}catch(e){if(e&&e.name==="AbortError")return}}
+  if(ES_MOVIL()&&navigator.share){try{await navigator.share({title:L.title,text:L.appText,url});return}catch(e){if(e&&e.name==="AbortError")return}}
   try{await navigator.clipboard.writeText(url);msg.textContent=L.linkCopied}catch(e){msg.textContent=url}
   msg.hidden=false;
 });
@@ -903,37 +903,49 @@ if(ES_MOVIL()&&$("rPct")){new MutationObserver(prepararImagen).observe($("rPct")
 $("btnShare").addEventListener("click",async()=>{
   const btn=$("btnShare"),msg=$("shareMsg");msg.textContent="";
   if(LAST.pct==null){msg.textContent=L.needDates;return}
-  // Móvil con la imagen ya preparada: se abre el menú de compartir en el mismo toque, sin esperas
-  if(ES_MOVIL()&&LISTA&&LISTA.firma===firma()&&navigator.share){
-    const{file,blob}=LISTA;
-    if(navigator.canShare&&navigator.canShare({files:[file]})){
-      navigator.share({files:[file],title:L.shareTitle,text:textoResultado()}).catch(e=>{
-        if(e&&e.name==="AbortError")return;
-        navigator.share({title:L.shareTitle,text:textoResultado()}).catch(()=>{descargar(blob);msg.textContent=L.dl});
-      });
-    }else{
-      navigator.share({title:L.shareTitle,text:textoResultado()}).catch(e=>{if(e&&e.name!=="AbortError"){descargar(blob);msg.textContent=L.dl}});
+  if(ES_MOVIL()){
+    // Navegador sin menú de compartir (p. ej., los que van dentro de otras apps): se descarga la imagen y se avisa
+    if(!navigator.share){
+      btn.disabled=true;btn.textContent=L.preparing;
+      try{const blob=(LISTA&&LISTA.firma===firma())?LISTA.blob:await imagenResultado();descargar(blob);msg.textContent=L.noShare}
+      catch(e){msg.textContent=L.shareFail(e.message||e)}
+      finally{btn.disabled=false;btn.textContent=L.shareBtn}
+      return;
     }
+    const datosDe=(l)=>(!l.soloTexto&&(!navigator.canShare||navigator.canShare({files:[l.file]})))
+      ?{files:[l.file],text:textoResultado()}:{title:L.shareTitle,text:textoResultado()};
+    // Imagen ya preparada: el menú de compartir se abre en el mismo toque, sin esperas
+    const lista=(LISTA&&LISTA.firma===firma())?LISTA:null;
+    if(lista){
+      const datos=datosDe(lista);
+      navigator.share(datos).catch(e=>{
+        if(e&&e.name==="AbortError")return;
+        if(datos.files){lista.soloTexto=true;msg.textContent=L.tapAgainText}
+        else msg.textContent=L.shareFail(e&&e.name||e);
+      });
+      return;
+    }
+    btn.disabled=true;btn.textContent=L.preparing;
+    try{
+      const blob=await imagenResultado(),file=new File([blob],L.file,{type:"image/png"});
+      LISTA={firma:firma(),file,blob};
+      const datos=datosDe(LISTA);
+      try{await navigator.share(datos)}
+      catch(e){
+        if(e&&e.name==="AbortError")return;
+        // Rechazado por la espera al preparar la imagen: ya está lista para el siguiente toque
+        if(e&&e.name==="NotAllowedError"){msg.textContent=L.tapAgain;return}
+        if(datos.files){LISTA.soloTexto=true;msg.textContent=L.tapAgainText;return}
+        throw e;
+      }
+    }catch(e){msg.textContent=L.shareFail(e.message||e)}
+    finally{btn.disabled=false;btn.textContent=L.shareBtn}
     return;
   }
+  // Ordenador: la imagen se copia al portapapeles para pegarla (Ctrl+V) en WhatsApp Web
   btn.disabled=true;btn.textContent=L.preparing;
   const blobP=imagenResultado();
   try{
-    if(ES_MOVIL()){
-      const blob=await blobP,file=new File([blob],L.file,{type:"image/png"});
-      LISTA={firma:firma(),file,blob};
-      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-        try{await navigator.share({files:[file],title:L.shareTitle,text:textoResultado()});}
-        catch(e){
-          if(e&&e.name==="AbortError")return;
-          // El navegador ha rechazado abrir el menú tras la espera: la imagen ya está lista para el siguiente toque
-          if(e&&e.name==="NotAllowedError"){msg.textContent=L.tapAgain;return}
-          throw e;
-        }
-        return;
-      }
-      descargar(blob);msg.textContent=L.dl;return;
-    }
     let copiado=false;
     if(navigator.clipboard&&window.ClipboardItem){
       // El ClipboardItem se crea en el mismo clic, con la imagen aún generándose (necesario en Safari).
