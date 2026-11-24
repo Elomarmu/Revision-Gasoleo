@@ -407,7 +407,7 @@ const TX={
   copied:"Imagen copiada. Pégala con Ctrl+V (⌘+V en Mac) en el chat de WhatsApp Web.",download:"Descargar la imagen",shareFail:m=>"No se pudo preparar la imagen ("+m+").",file:"revision-gasoleo.png",
   title:"Revisión por gasóleo · Grupo Trimodos",
   appText:"Calculadora de la revisión del precio del transporte por la variación del gasóleo, con los precios semanales del Ministerio de Transportes.",
-  linkCopied:"Enlace a la app copiado. Pégalo donde quieras compartirlo.",tapAgain:"La imagen ya está lista: vuelve a pulsar «Compartir resultado» para elegir la aplicación.",tapAgainText:"Este navegador no deja compartir la imagen: vuelve a pulsar «Compartir resultado» para enviar el resultado como texto.",noShare:"Este navegador no tiene menú de compartir, así que se ha descargado la imagen. Para elegir la aplicación, abre la calculadora en Chrome (Android) o Safari (iPhone).",infoT:"Información legal",shareAppT:"Compartir app",
+  linkCopied:"Enlace a la app copiado. Pégalo donde quieras compartirlo.",tapAgain:"La imagen ya está lista: vuelve a pulsar «Compartir resultado» para elegir la aplicación.",openFull:"Abrir la calculadora a pantalla completa",iframeShare:"Desde aquí el navegador no deja abrir el menú de compartir, así que se ha descargado la imagen. Para compartirla directamente:",iframeInstall:"Para instalarla como app, ábrela primero a pantalla completa:",tapAgainText:"Este navegador no deja compartir la imagen: vuelve a pulsar «Compartir resultado» para enviar el resultado como texto.",noShare:"Este navegador no tiene menú de compartir, así que se ha descargado la imagen. Para elegir la aplicación, abre la calculadora en Chrome (Android) o Safari (iPhone).",infoT:"Información legal",shareAppT:"Compartir app",
   install:"Instalar app",installed:"App instalada. La encontrarás junto a tus otras aplicaciones.",
   iosHelp:"Para instalarla en el iPhone o iPad: pulsa el botón Compartir de Safari (el cuadrado con la flecha) y elige «Añadir a pantalla de inicio».",
   offline:"Sin conexión: se muestran los últimos precios descargados.",
@@ -442,7 +442,7 @@ const TX={
   copied:"Image copied. Paste it with Ctrl+V (⌘+V on a Mac) into the WhatsApp Web chat.",download:"Download the image",shareFail:m=>"The image could not be prepared ("+m+").",file:"diesel-price-revision.png",
   title:"Diesel Price Revision · Grupo Trimodos",
   appText:"Calculator for revising haulage prices when the price of diesel changes, using the Spanish Ministry of Transport's weekly prices.",
-  linkCopied:"Link to the app copied. Paste it wherever you want to share it.",tapAgain:"The image is ready: tap “Share result” again to choose the app.",tapAgainText:"This browser does not allow sharing the image: tap “Share result” again to send the result as text.",noShare:"This browser has no share menu, so the image has been downloaded. To choose the app, open the calculator in Chrome (Android) or Safari (iPhone).",infoT:"Legal information",shareAppT:"Share app",
+  linkCopied:"Link to the app copied. Paste it wherever you want to share it.",tapAgain:"The image is ready: tap “Share result” again to choose the app.",openFull:"Open the calculator full screen",iframeShare:"The browser does not allow the share menu from here, so the image has been downloaded. To share it directly:",iframeInstall:"To install it as an app, first open it full screen:",tapAgainText:"This browser does not allow sharing the image: tap “Share result” again to send the result as text.",noShare:"This browser has no share menu, so the image has been downloaded. To choose the app, open the calculator in Chrome (Android) or Safari (iPhone).",infoT:"Legal information",shareAppT:"Share app",
   install:"Install app",installed:"App installed. You will find it with your other apps.",
   iosHelp:"To install it on an iPhone or iPad: tap Safari's Share button (the square with the arrow) and choose “Add to Home Screen”.",
   offline:"Offline: showing the latest downloaded prices.",
@@ -759,9 +759,16 @@ window.addEventListener("appinstalled",()=>{promptInstalar=null;$("btnInstall").
 if(IOS&&!STANDALONE())$("btnInstall").hidden=false;
 $("btnInstall").addEventListener("click",async()=>{
   if(promptInstalar){promptInstalar.prompt();const r=await promptInstalar.userChoice.catch(()=>null);if(r&&r.outcome==="accepted")$("btnInstall").hidden=true;promptInstalar=null;return}
-  $("installMsg").hidden=false;$("installMsg").textContent=L.iosHelp;
+  $("installMsg").hidden=false;
+  if(EN_IFRAME){avisoPantallaCompleta($("installMsg"),L.iframeInstall);return}
+  $("installMsg").textContent=L.iosHelp;
 });
 if(!navigator.onLine){$("installMsg").hidden=false;$("installMsg").textContent=L.offline}
+if(window.self!==window.top){
+  let ultima=0;const enviar=()=>{const h=Math.ceil(document.documentElement.scrollHeight);if(h!==ultima){ultima=h;try{parent.postMessage({tipo:"actm-calculadora-altura",altura:h},"*")}catch(e){}}};
+  try{new ResizeObserver(enviar).observe(document.body)}catch(e){setInterval(enviar,1000)}
+  addEventListener("load",enviar);document.addEventListener("toggle",enviar,true);setTimeout(enviar,1500);
+}
 document.querySelectorAll(".brand .lang button").forEach(b=>b.addEventListener("click",()=>{
   if(b.dataset.lang===LANG)return;LANG=b.dataset.lang;L=TX[LANG];try{localStorage.setItem("gasoleo-lang",LANG)}catch(e){}
   $("shareMsg").textContent="";$("installMsg").hidden=true;applyStatic();drawCTables();renderStatus();calc();
@@ -842,6 +849,17 @@ function descargar(blob){
 // Móvil: menú de compartir del sistema (WhatsApp, etc.).
 // Ordenador: copiar la imagen al portapapeles para pegarla con Ctrl+V. El menú de compartir de Windows
 // tiene una opción «Copiar» que no deja la imagen en el portapapeles, por eso no se usa en el ordenador.
+// ¿La calculadora va dentro de un recuadro (iframe) de otra web? Ahí el navegador puede bloquear compartir y el portapapeles
+const EN_IFRAME=(()=>{try{return window.self!==window.top}catch(e){return true}})();
+// Solo se da por bloqueado si el navegador conoce el permiso «web-share» y dice que este recuadro no lo tiene
+const COMPARTIR_OK=()=>{if(!navigator.share)return false;if(!EN_IFRAME)return true;
+  try{const fp=document.featurePolicy;if(fp&&fp.features&&fp.features().includes("web-share"))return fp.allowsFeature("web-share")}catch(e){}
+  return true};
+function avisoPantallaCompleta(msg,texto){
+  msg.textContent=texto+" ";
+  const a=document.createElement("a");a.href=location.href.split("#")[0];a.target="_blank";a.rel="noopener";a.textContent=L.openFull;a.style.color="inherit";a.style.fontWeight="700";
+  msg.appendChild(a);
+}
 const ES_MOVIL=()=>/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
 // En el móvil la imagen se deja preparada de antemano: el menú de compartir solo se abre si se llama
 // en el mismo toque, y generar la imagen después del toque hace que el navegador (sobre todo Safari) lo rechace.
@@ -862,9 +880,10 @@ $("btnShare").addEventListener("click",async()=>{
   if(LAST.pct==null){msg.textContent=L.needDates;return}
   if(ES_MOVIL()){
     // Navegador sin menú de compartir (p. ej., los que van dentro de otras apps): se descarga la imagen y se avisa
-    if(!navigator.share){
+    if(!COMPARTIR_OK()){
       btn.disabled=true;btn.textContent=L.preparing;
-      try{const blob=(LISTA&&LISTA.firma===firma())?LISTA.blob:await imagenResultado();descargar(blob);msg.textContent=L.noShare}
+      try{const blob=(LISTA&&LISTA.firma===firma())?LISTA.blob:await imagenResultado();descargar(blob);
+        if(EN_IFRAME)avisoPantallaCompleta(msg,L.iframeShare);else msg.textContent=L.noShare}
       catch(e){msg.textContent=L.shareFail(e.message||e)}
       finally{btn.disabled=false;btn.textContent=L.shareBtn}
       return;
@@ -877,6 +896,7 @@ $("btnShare").addEventListener("click",async()=>{
       const datos=datosDe(lista);
       navigator.share(datos).catch(e=>{
         if(e&&e.name==="AbortError")return;
+        if(e&&e.name==="NotAllowedError"&&EN_IFRAME){descargar(lista.blob);avisoPantallaCompleta(msg,L.iframeShare);return}
         if(datos.files){lista.soloTexto=true;msg.textContent=L.tapAgainText}
         else msg.textContent=L.shareFail(e&&e.name||e);
       });
@@ -891,7 +911,7 @@ $("btnShare").addEventListener("click",async()=>{
       catch(e){
         if(e&&e.name==="AbortError")return;
         // Rechazado por la espera al preparar la imagen: ya está lista para el siguiente toque
-        if(e&&e.name==="NotAllowedError"){msg.textContent=L.tapAgain;return}
+        if(e&&e.name==="NotAllowedError"){if(EN_IFRAME){descargar(blob);avisoPantallaCompleta(msg,L.iframeShare)}else msg.textContent=L.tapAgain;return}
         if(datos.files){LISTA.soloTexto=true;msg.textContent=L.tapAgainText;return}
         throw e;
       }
@@ -915,7 +935,8 @@ $("btnShare").addEventListener("click",async()=>{
       link.addEventListener("click",ev=>{ev.preventDefault();descargar(blob)});msg.appendChild(link);
     }else{
       descargar(blob);
-      msg.textContent=(await copiarTexto(textoResultado()))?L.dlCopied:L.dl;
+      const ok=await copiarTexto(textoResultado());
+      if(EN_IFRAME)avisoPantallaCompleta(msg,ok?L.dlCopied:L.dl);else msg.textContent=ok?L.dlCopied:L.dl;
     }
   }catch(e){msg.textContent=L.shareFail(e.message||e);}
   finally{btn.disabled=false;btn.textContent=L.shareBtn}
