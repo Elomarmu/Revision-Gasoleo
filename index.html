@@ -404,7 +404,7 @@ const TX={
   imFoot:d=>"Precios: Ministerio de Transportes (Excel del "+d+") · Ley 15/2009, art. 38 · Cálculo orientativo",
   txt:(a,b,c,d,e,f,g,h)=>`Revisión del precio del transporte por gasóleo\nReferencia (${a}): ${b} €/l\nCálculo (${c}): ${d} €/l\nVariación del gasóleo (G): ${e}\nCoeficiente C: ${f}\nVariación del transporte: ${g}\n${h}`,
   needDates:"Completa las fechas para tener un resultado que compartir.",preparing:"Preparando…",shareBtn:"Compartir resultado",shareTitle:"Revisión del precio por gasóleo",
-  dlCopied:"Imagen descargada y resumen copiado. Adjunta la imagen en WhatsApp.",dl:"Imagen descargada. Adjúntala en WhatsApp.",
+  dlCopied:"Este navegador no deja copiar imágenes: se ha descargado la imagen y el resumen está copiado. Arrastra la imagen o adjúntala en WhatsApp Web.",dl:"Este navegador no deja copiar imágenes: se ha descargado. Arrástrala o adjúntala en WhatsApp Web.",
   copied:"Imagen copiada. Pégala con Ctrl+V (⌘+V en Mac) en el chat de WhatsApp Web.",download:"Descargar la imagen",
   copied:"Imagen copiada. Pégala con Ctrl+V (⌘+V en Mac) en el chat de WhatsApp Web.",download:"Descargar la imagen",shareFail:m=>"No se pudo preparar la imagen ("+m+").",file:"revision-gasoleo.png",
   title:"Revisión por gasóleo · Grupo Trimodos",
@@ -439,7 +439,7 @@ const TX={
   imFoot:d=>"Prices: Spanish Ministry of Transport (spreadsheet of "+d+") · Law 15/2009, art. 38 · For guidance only",
   txt:(a,b,c,d,e,f,g,h)=>`Haulage price revision for diesel price changes\nReference (${a}): €${b}/l\nCalculation (${c}): €${d}/l\nChange in diesel price (G): ${e}\nCoefficient C: ${f}\nChange in haulage price: ${g}\n${h}`,
   needDates:"Fill in the dates to get a result to share.",preparing:"Preparing…",shareBtn:"Share result",shareTitle:"Haulage price revision for diesel",
-  dlCopied:"Image downloaded and summary copied. Attach the image in WhatsApp.",dl:"Image downloaded. Attach it in WhatsApp.",
+  dlCopied:"This browser does not allow copying images: the image has been downloaded and the summary copied. Drag or attach the image in WhatsApp Web.",dl:"This browser does not allow copying images: it has been downloaded. Drag or attach it in WhatsApp Web.",
   copied:"Image copied. Paste it with Ctrl+V (⌘+V on a Mac) into the WhatsApp Web chat.",download:"Download the image",
   copied:"Image copied. Paste it with Ctrl+V (⌘+V on a Mac) into the WhatsApp Web chat.",download:"Download the image",shareFail:m=>"The image could not be prepared ("+m+").",file:"diesel-price-revision.png",
   title:"Diesel Price Revision · Grupo Trimodos",
@@ -739,10 +739,16 @@ bInfo.addEventListener("click",e=>{e.stopPropagation();const abrir=pop.hidden;po
 document.addEventListener("click",e=>{if(!pop.hidden&&!pop.contains(e.target))cerrarInfo()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!pop.hidden){cerrarInfo();bInfo.focus()}});
 // ---- Compartir la app ----
+// Copia texto al portapapeles; si el navegador bloquea la API moderna, usa el método clásico (execCommand)
+async function copiarTexto(t){
+  try{await navigator.clipboard.writeText(t);return true}catch(e){}
+  try{const a=document.createElement("textarea");a.value=t;a.setAttribute("readonly","");a.style.cssText="position:fixed;top:0;left:0;opacity:0";
+    document.body.appendChild(a);a.select();const ok=document.execCommand("copy");a.remove();return ok}catch(e){return false}
+}
 $("btnShareApp").addEventListener("click",async()=>{
   const url=location.origin+location.pathname+(LANG==="en"?"?lang=en":""),msg=$("installMsg");
   if(ES_MOVIL()&&navigator.share){try{await navigator.share({title:L.title,text:L.appText,url});return}catch(e){if(e&&e.name==="AbortError")return}}
-  try{await navigator.clipboard.writeText(url);msg.textContent=L.linkCopied}catch(e){msg.textContent=url}
+  msg.textContent=(await copiarTexto(url))?L.linkCopied:url;
   msg.hidden=false;
 });
 // ---- App instalable (PWA) ----
@@ -911,7 +917,7 @@ $("btnShare").addEventListener("click",async()=>{
       link.addEventListener("click",ev=>{ev.preventDefault();descargar(blob)});msg.appendChild(link);
     }else{
       descargar(blob);
-      try{await navigator.clipboard.writeText(textoResultado());msg.textContent=L.dlCopied}catch(e){msg.textContent=L.dl}
+      msg.textContent=(await copiarTexto(textoResultado()))?L.dlCopied:L.dl;
     }
   }catch(e){msg.textContent=L.shareFail(e.message||e);}
   finally{btn.disabled=false;btn.textContent=L.shareBtn}
