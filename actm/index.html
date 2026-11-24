@@ -430,7 +430,9 @@ const TX={
   appText:"Calculadora de la revisión del precio del transporte por la variación del gasóleo, con los precios semanales del Ministerio de Transportes.",
   linkCopied:"Enlace a la app copiado. Pégalo donde quieras compartirlo.",infoT:"Información legal",shareAppT:"Compartir app",
   install:"Instalar app",installed:"App instalada. La encontrarás junto a tus otras aplicaciones.",
-  iosHelp:"Para instalarla en el iPhone o iPad: pulsa el botón Compartir de Safari (el cuadrado con la flecha) y elige «Añadir a pantalla de inicio».",
+  iosHelp:"Para instalarla en el iPhone o iPad: ábrela en Safari, pulsa el botón Compartir (el cuadrado con la flecha) y elige «Añadir a pantalla de inicio».",
+  androidHelp:"Para instalarla: abre el menú del navegador (los tres puntos ⋮) y elige «Instalar aplicación» o «Añadir a pantalla de inicio». Si no aparece, ábrela en Chrome.",
+  deskHelp:"Para instalarla en el ordenador: en Chrome o Edge, pulsa el icono de instalar que aparece a la derecha de la barra de direcciones, o abre el menú (⋮) y elige «Instalar página como aplicación».",
   offline:"Sin conexión: se muestran los últimos precios descargados.",
   today:"hoy",yesterday:"ayer",at:" a las "},
  en:{loc:"en-GB",pct:"%",
@@ -469,7 +471,9 @@ const TX={
   appText:"Calculator for revising haulage prices when the price of diesel changes, using the Spanish Ministry of Transport's weekly prices.",
   linkCopied:"Link to the app copied. Paste it wherever you want to share it.",infoT:"Legal information",shareAppT:"Share app",
   install:"Install app",installed:"App installed. You will find it with your other apps.",
-  iosHelp:"To install it on an iPhone or iPad: tap Safari's Share button (the square with the arrow) and choose “Add to Home Screen”.",
+  iosHelp:"To install it on an iPhone or iPad: open it in Safari, tap the Share button (the square with the arrow) and choose “Add to Home Screen”.",
+  androidHelp:"To install it: open the browser menu (the three dots ⋮) and choose “Install app” or “Add to Home screen”. If it is not there, open it in Chrome.",
+  deskHelp:"To install it on a computer: in Chrome or Edge, click the install icon on the right of the address bar, or open the menu (⋮) and choose “Install page as app”.",
   offline:"Offline: showing the latest downloaded prices.",
   today:"today",yesterday:"yesterday",at:" at "}
 };
@@ -786,12 +790,14 @@ document.addEventListener("click",e=>{if(!pop.hidden&&!pop.contains(e.target))ce
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!pop.hidden){cerrarInfo();bInfo.focus()}});
 // ---- Compartir la app ----
 $("btnShareApp").addEventListener("click",async()=>{
-  const url=location.origin+location.pathname+(LANG==="en"?"?lang=en":""),msg=$("installMsg");
+  const url=APP_URL,msg=$("installMsg");
   if(navigator.share){try{await navigator.share({title:L.title,text:L.appText,url});return}catch(e){if(e&&e.name==="AbortError")return}}
   try{await navigator.clipboard.writeText(url);msg.textContent=L.linkCopied}catch(e){msg.textContent=url}
   msg.hidden=false;
 });
 // ---- App instalable (PWA) ----
+// Dirección pública que se comparte: la página de la calculadora en la web de ACTM
+const APP_URL="https://actm.es/calculadora-actm/",APP_URL_TXT="actm.es/calculadora-actm";
 {const b=document.querySelector(".brand");const f=()=>b.classList.toggle("fija",scrollY>4);addEventListener("scroll",f,{passive:true});f()}
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 const STANDALONE=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
@@ -799,10 +805,11 @@ const IOS=/iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==="
 let promptInstalar=null;
 window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();promptInstalar=e;if(!STANDALONE())$("btnInstall").hidden=false});
 window.addEventListener("appinstalled",()=>{promptInstalar=null;$("btnInstall").hidden=true;$("installMsg").hidden=false;$("installMsg").textContent=L.installed});
-if(IOS&&!STANDALONE())$("btnInstall").hidden=false;
+if(!STANDALONE())$("btnInstall").hidden=false;
 $("btnInstall").addEventListener("click",async()=>{
   if(promptInstalar){promptInstalar.prompt();const r=await promptInstalar.userChoice.catch(()=>null);if(r&&r.outcome==="accepted")$("btnInstall").hidden=true;promptInstalar=null;return}
-  $("installMsg").hidden=false;$("installMsg").textContent=L.iosHelp;
+  const ua=navigator.userAgent,AND=/Android/i.test(ua);
+  $("installMsg").hidden=false;$("installMsg").textContent=IOS?L.iosHelp:AND?L.androidHelp:L.deskHelp;
 });
 if(!navigator.onLine){$("installMsg").hidden=false;$("installMsg").textContent=L.offline}
 document.querySelectorAll(".brand .lang button").forEach(b=>b.addEventListener("click",()=>{
@@ -880,11 +887,11 @@ async function imagenResultado(){
   x.fillStyle=LAST.verdictOk?GOOD:GOLD;x.font=`800 28px ${BODY}`;x.fillText(LAST.verdict,60,1232);
   x.fillStyle=MUT;const pie=L.imFoot(fmtDate(fileDateMs()));
   fitText(x,pie,W-120,22,500,BODY);x.fillText(pie,60,1274);
-  x.fillStyle=GOLD;x.font=`700 24px ${BODY}`;x.fillText((location.host+location.pathname).replace(/\/$/,""),60,1312);
+  x.fillStyle=GOLD;x.font=`700 24px ${BODY}`;x.fillText(APP_URL_TXT,60,1312);
   return await new Promise(res=>c.toBlob(res,"image/png"));
 }
 function textoResultado(){
-  return L.txt(specLabel(S.ref),nf(LAST.rv,5),specLabel(S.real),nf(LAST.tv,5),pc(LAST.G,LAST.gd,true),nf(LAST.C,2),pc(LAST.pct,2,true),location.href.split("#")[0].split("?")[0]+(LANG==="en"?"?lang=en":""));
+  return L.txt(specLabel(S.ref),nf(LAST.rv,5),specLabel(S.real),nf(LAST.tv,5),pc(LAST.G,LAST.gd,true),nf(LAST.C,2),pc(LAST.pct,2,true),APP_URL);
 }
 function descargar(blob){
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=L.file;document.body.appendChild(a);a.click();a.remove();
