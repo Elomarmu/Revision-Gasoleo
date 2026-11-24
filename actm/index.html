@@ -384,7 +384,7 @@ tr.in-real td{background:var(--band-b)}
   </section>
   <footer class="foot">
     <span>Una herramienta de <b>ACTM</b> · Asociación Empresarial Castellonense de Transportes de Mercancías</span>
-    <a href="https://actm.es/" target="_blank" rel="noopener">actm.es</a>
+    <span><a class="guia" href="guia/">Guía de uso</a> · <a href="https://actm.es/" target="_blank" rel="noopener">actm.es</a></span>
   </footer>
 </div>
 
@@ -511,8 +511,8 @@ const STATIC_EN=[
  [".aviso p:nth-child(1)","<b>Important.</b> The result is for guidance only and depends on the data you enter. ACTM accepts no liability for decisions taken on the basis of it; for a dispute or claim, check it against the <a href=\"https://apps.fomento.gob.es/preciogasoleo/angular_proyecto/client/gasoleoCambio\" target=\"_blank\" rel=\"noopener\">Ministry's official calculator</a>."],
  [".aviso p:nth-child(2)","The calculation applies the formula in condition 3.4 of Order FOM/1882/2012, as amended by Royal Decree-law 9/2026 and Royal Decree-law 18/2026, under the rules of article 38 of Law 15/2009 on contracts for the carriage of goods by land. Prices are the weekly figures for automotive diesel in Spain published by the Spanish Ministry of Transport and Sustainable Mobility."],
  [".aviso p:nth-child(3)","Since Royal Decree-law 18/2026 came into force on 1 July 2026, the reference price used and the thresholds that set coefficient C have changed. <a href=\"https://www.transportes.gob.es/recursos_mfom/comodin/recursos/20260702_nota_metodologica_variacion_precio_transporte.pdf\" target=\"_blank\" rel=\"noopener\">Ministry methodological note (3/7/2026)</a> (in Spanish)."],
- [".brand .assoc","Castellón Road Haulage Business Association"],
- [".foot > span","A tool by <b>ACTM</b> · Castellón Road Haulage Business Association"]
+ [".brand .assoc","Castellón Road Haulage Business Association"],[".foot a.guia","User guide (in Spanish)"],
+ [".foot > span:first-child","A tool by <b>ACTM</b> · Castellón Road Haulage Business Association"]
 ];
 let LANG=(()=>{try{const q=new URLSearchParams(location.search).get("lang");if(q==="en"||q==="es")return q;const v=localStorage.getItem("actm-gasoleo-lang");if(v==="en"||v==="es")return v}catch(e){}return /^es\b/i.test(navigator.language||"es")?"es":"en"})();
 let L=TX[LANG];

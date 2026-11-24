@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Guía de la calculadora del gasóleo · ACTM</title>
+<meta name="description" content="Guía de uso para los asociados de ACTM de la calculadora de revisión del precio del transporte por variación del gasóleo.">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" type="image/png" href="../img/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --amarillo:#ffc728; --negro:#000; --tinta:#111; --gris:#5d5d58; --linea:#e2e2dc; --fondo:#f6f6f3; --blanco:#fff;
+  --oro:#7a5700; --suave:#fff6d6;
+  --f:"Poppins","Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--fondo:#f6f6f3}}
+:root[data-theme="dark"]{--fondo:#f6f6f3}
+*{box-sizing:border-box}
+html{scroll-padding-top:84px}
+body{margin:0;background:var(--fondo);color:var(--tinta);font:400 15.5px/1.65 var(--f);-webkit-text-size-adjust:100%}
+img{max-width:100%;height:auto;display:block}
+a{color:var(--negro);text-decoration-color:var(--amarillo);text-decoration-thickness:2px;text-underline-offset:3px}
+h1,h2,h3{font-family:var(--f);line-height:1.2;margin:0}
+p{margin:0 0 12px}
+
+/* Cabecera blanca con el logotipo (fija, como la calculadora) */
+.brand{position:sticky;top:0;z-index:10;background:#fff;box-shadow:0 1px 0 var(--linea)}
+.brand-in{max-width:960px;margin:0 auto;padding:12px max(16px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:16px;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--negro)}
+.logo img{height:50px;width:auto}
+.logo span{font:500 12.5px/1.3 var(--f);border-left:2px solid var(--amarillo);padding-left:12px;max-width:26ch}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--negro);color:#fff;text-decoration:none;font:600 14px/1 var(--f);padding:12px 18px;border-radius:0;white-space:nowrap}
+.btn.am{background:#fff;color:var(--negro);box-shadow:inset 0 0 0 2px var(--negro)}
+
+/* Portada amarilla con la línea blanca curva de actm.es */
+.hero{position:relative;overflow:hidden;background:var(--amarillo);color:var(--negro)}
+.hero svg.curva{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hero-in{position:relative;max-width:960px;margin:0 auto;padding:44px max(16px,env(safe-area-inset-left,0px)) 52px;display:grid;grid-template-columns:1fr auto;gap:28px;align-items:center}
+.hero .eyebrow{font:600 13px/1 var(--f);letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px}
+.hero h1{font-weight:700;text-transform:uppercase;font-size:clamp(26px,4.4vw,42px);letter-spacing:.005em;max-width:20ch}
+.hero .sub{margin-top:14px;font-weight:500;font-size:16px;max-width:52ch}
+.qr{background:#fff;padding:14px;text-align:center;width:200px}
+.qr img{width:172px;height:172px;margin:0 auto}
+.qr b{display:block;font:600 12px/1.35 var(--f);margin-top:8px;word-break:break-all}
+.hero .acciones{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+
+main{max-width:960px;margin:0 auto;padding:8px max(16px,env(safe-area-inset-left,0px)) 40px}
+section{background:#fff;border:1px solid var(--linea);border-radius:12px;padding:28px clamp(18px,3vw,34px);margin-top:22px}
+.num{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--negro);color:var(--amarillo);font:700 16px/1 var(--f);flex:none}
+.sec-h{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.sec-h h2{font-size:22px;font-weight:700}
+.sec-h .paso{font:600 12px/1 var(--f);letter-spacing:.1em;text-transform:uppercase;color:var(--oro);display:block;margin-bottom:5px}
+h3{font-size:16.5px;font-weight:700;margin:20px 0 8px}
+.lead{font-size:16.5px}
+figure{margin:18px 0 6px;border:1px solid var(--linea);border-radius:10px;overflow:hidden;background:var(--fondo)}
+figure img{width:100%}
+figcaption{font-size:13px;color:var(--gris);padding:10px 14px;border-top:1px solid var(--linea);background:#fff}
+.dos{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+.dos figure{margin-top:4px}
+.mini{max-width:330px}
+ol.leyenda{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:10px}
+ol.leyenda li{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+ol.leyenda li .num{width:28px;height:28px;font-size:14px;margin-top:1px}
+table{width:100%;border-collapse:collapse;font-size:14px;margin:10px 0 4px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--linea);vertical-align:top}
+th{font:600 12px/1.3 var(--f);letter-spacing:.06em;text-transform:uppercase;color:var(--gris);background:var(--fondo)}
+td b{white-space:nowrap}
+.tablebox{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.nota{background:var(--suave);border-left:4px solid var(--amarillo);padding:12px 16px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14.5px}
+.ejemplo{background:var(--negro);color:#fff;border-radius:10px;padding:18px 20px;margin:16px 0;border-top:6px solid var(--amarillo)}
+.ejemplo h3{color:var(--amarillo);margin:0 0 10px;font-size:13px;letter-spacing:.1em;text-transform:uppercase}
+.ejemplo .cifras{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:10px}
+.ejemplo .cifras div{border-top:1px solid rgba(255,255,255,.2);padding-top:8px}
+.ejemplo .cifras small{display:block;color:var(--amarillo);font:600 11px/1.3 var(--f);letter-spacing:.08em;text-transform:uppercase}
+.ejemplo .cifras strong{font-size:22px;font-weight:700}
+.resumen{counter-reset:p;list-style:none;padding:0;margin:6px 0 0;display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.resumen li{background:var(--fondo);border-radius:10px;padding:14px;font-size:14px;line-height:1.45;border-top:4px solid var(--amarillo)}
+.resumen li b{display:block;font-size:15px;margin-bottom:4px}
+.resumen li::before{counter-increment:p;content:counter(p);display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--negro);color:var(--amarillo);font:700 13px/1 var(--f);margin-bottom:8px}
+dl.faq dt{font-weight:700;margin-top:16px}
+dl.faq dd{margin:4px 0 0}
+.formula{font:600 15px/1.5 ui-monospace,Menlo,Consolas,monospace;background:var(--fondo);padding:12px 14px;border-radius:8px;overflow-x:auto}
+footer{max-width:960px;margin:0 auto;padding:10px max(16px,env(safe-area-inset-left,0px)) 40px;color:var(--gris);font-size:13px;display:flex;flex-wrap:wrap;gap:8px 18px;justify-content:space-between}
+footer b{color:var(--tinta)}
+
+@media (max-width:760px){
+  .hero-in{grid-template-columns:1fr;padding-top:32px}
+  .qr{display:none}
+  .dos{grid-template-columns:1fr}
+  .resumen{grid-template-columns:1fr 1fr}
+  .ejemplo .cifras{grid-template-columns:1fr 1fr}
+  .logo img{height:40px}.logo span{font-size:11px;padding-left:9px}
+  .brand .btn{padding:10px 12px;font-size:13px}
+}
+@media (max-width:420px){.logo span{display:none}.resumen{grid-template-columns:1fr}}
+
+/* PDF / impresión en A4 */
+@page{size:A4;margin:14mm 13mm 16mm}
+@media print{
+  body{background:#fff;font-size:10.5pt;line-height:1.5}
+  .brand{position:static;box-shadow:none;border-bottom:3px solid var(--amarillo)}
+  .brand .btn,.hero .acciones,.solo-web{display:none!important}
+  .hero{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .hero-in{padding:26px 6mm 30px}
+  .qr{display:block}
+  main{padding:0}
+  section{border:0;border-top:1px solid #e2e2dc;border-radius:0;padding:5mm 0 0;margin:5mm 0 0;break-before:auto}
+  section.salto{break-before:page;border-top:0;margin-top:0}
+  .sec-h,h3{break-after:avoid}
+  .hero-in{grid-template-columns:1fr auto!important}
+  .resumen{grid-template-columns:repeat(5,1fr)!important}
+  .ejemplo .cifras{grid-template-columns:repeat(4,1fr)!important}
+  .logo span{display:block!important}
+  .mini{max-width:62mm}
+  body{font-size:10pt}
+  ol.leyenda{gap:5px}
+  th,td{padding:5px 8px}
+  figure{margin:10px 0 4px}
+  figure img{max-height:105mm;width:auto;max-width:100%;margin:0 auto}
+  #mas figure:first-of-type img{max-height:78mm}
+  #mas .dos figure img{max-height:70mm}
+  .nota{margin:8px 0;padding:8px 12px}
+  figure,.ejemplo,.nota,table,ol.leyenda li,dl.faq dt,dl.faq dd{break-inside:avoid}
+  .ejemplo,.resumen li,th,.num,.nota,.hero{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  figure{border-color:#ddd}
+  .dos{grid-template-columns:1fr 1fr!important}
+  a{text-decoration:none}
+  footer{padding:6mm 0 0}
+}
+</style>
+</head>
+<body>
+
+<header class="brand">
+  <div class="brand-in">
+    <a class="logo" href="https://actm.es/" target="_blank" rel="noopener" aria-label="ACTM · Asociación Empresarial Castellonense de Transportes de Mercancías">
+      <img src="../img/actm-marca.png" alt="actm" width="111" height="54">
+      <span>Asociación Empresarial Castellonense de Transportes de Mercancías</span>
+    </a>
+    <a class="btn" href="../">Abrir la calculadora</a>
+  </div>
+</header>
+
+<div class="hero">
+  <svg class="curva" viewBox="0 0 1000 300" preserveAspectRatio="none" aria-hidden="true"><path d="M-10 12 H8 Q10 262 120 288 Q480 297 1010 293" fill="none" stroke="#fff" stroke-width="3" vector-effect="non-scaling-stroke"/><path d="M700 -10 Q712 150 1010 170" fill="none" stroke="#fff" stroke-width="3" vector-effect="non-scaling-stroke"/></svg>
+  <div class="hero-in">
+    <div>
+      <p class="eyebrow">Guía para los asociados</p>
+      <h1>Calculadora de revisión del precio del transporte por gasóleo</h1>
+      <p class="sub">Cómo calcular, en un minuto y desde el móvil, cuánto hay que revisar el precio de un transporte por la variación del gasóleo, con los precios oficiales del Ministerio de Transportes.</p>
+      <div class="acciones"><a class="btn" href="../">Abrir la calculadora</a><a class="btn am" href="Guia-calculadora-gasoleo-ACTM.pdf" download>Descargar la guía en PDF</a></div>
+    </div>
+    <div class="qr"><img src="qr.svg" alt="Código QR de la calculadora" width="172" height="172"><b>elomarmu.github.io/<br>Revision-Gasoleo/actm</b></div>
+  </div>
+</div>
+
+<main>
+
+<section class="sin-salto" id="resumen">
+  <div class="sec-h"><h2>En un minuto</h2></div>
+  <ol class="resumen">
+    <li><b>Referencia</b>La fecha o el precio del gasóleo de tu contrato.</li>
+    <li><b>Cálculo</b>El día, la semana o el mes en que haces el transporte.</li>
+    <li><b>Vehículo</b>Elige el tipo y el tramo de peso (MMA).</li>
+    <li><b>Precio y umbral</b>El precio pactado del servicio y el umbral de revisión.</li>
+    <li><b>Resultado</b>Lee el porcentaje a revisar y compártelo.</li>
+  </ol>
+  <p style="margin-top:16px">La calculadora aplica la fórmula oficial de la revisión del precio del transporte por carretera por la variación del gasóleo, con los precios semanales que publica el <b>Ministerio de Transportes y Movilidad Sostenible</b>. Los precios se actualizan solos cada semana: no tienes que descargar nada.</p>
+</section>
+
+<section id="que-es">
+  <div class="sec-h"><h2>Qué es y para qué sirve</h2></div>
+  <p>El <b>artículo 38 de la Ley 15/2009</b>, del contrato de transporte terrestre de mercancías, obliga a revisar el precio del transporte cuando el precio del gasóleo varía entre la fecha del contrato (la <b>referencia</b>) y la de realización del transporte (el <b>cálculo</b>). La fórmula está en la condición 3.4 de la <b>Orden FOM/1882/2012</b>, en la redacción del <b>Real Decreto-ley 9/2026</b> y del <b>Real Decreto-ley 18/2026</b>.</p>
+  <p class="formula">Revisión (%) = G × C &nbsp;·&nbsp; G = (precio de cálculo − precio de referencia) / precio de referencia × 100</p>
+  <ul>
+    <li><b>G</b> es la variación del precio del gasóleo, en %.</li>
+    <li><b>C</b> es el coeficiente que representa el peso del gasóleo en el coste del transporte. Depende del tipo de vehículo y del nivel del precio del gasóleo; la calculadora lo pone sola.</li>
+    <li>La revisión es <b>obligatoria</b> cuando la variación del gasóleo (G) llega al 5 % (o al umbral más bajo que se haya pactado por escrito), y <b>siempre</b> en los contratos continuados, en cada periodo de facturación.</li>
+  </ul>
+</section>
+
+<section id="instalar">
+  <div class="sec-h"><span class="num">0</span><div><span class="paso">Antes de empezar</span><h2>Abrirla e instalarla en el móvil</h2></div></div>
+  <div class="dos">
+    <div>
+      <p>Escanea el código QR de la portada o abre <a href="https://elomarmu.github.io/Revision-Gasoleo/actm/">elomarmu.github.io/Revision-Gasoleo/actm</a>. Funciona en cualquier móvil, tableta u ordenador, sin registrarse.</p>
+      <p>Para tenerla como una app más, con su icono en la pantalla de inicio:</p>
+      <ol class="leyenda">
+        <li><span class="num">1</span><div><b>Información legal e idioma.</b> El botón <b>i</b> abre las referencias legales y el aviso de uso. <b>ES / EN</b> cambia entre español e inglés. Esta franja se queda siempre arriba.</div></li>
+        <li><span class="num">2</span><div><b>Compartir la app.</b> Envía la dirección de la calculadora a un compañero (WhatsApp, correo…).</div></li>
+        <li><span class="num">3</span><div><b>Instalar app</b> (Android, Chrome, Edge). En <b>iPhone</b>, desde Safari: botón <b>Compartir</b> → <b>Añadir a pantalla de inicio</b>.</div></li>
+      </ol>
+      <div class="nota">Debajo del título verás la <b>última semana con precio</b> publicada por el Ministerio. El Ministerio publica un precio nuevo cada semana y la calculadora lo incorpora sola.</div>
+    </div>
+    <figure class="mini"><img src="09-movil.png" alt="Calculadora en el móvil con los botones de información, idioma, compartir e instalar señalados" width="390" height="760" loading="lazy"><figcaption>La calculadora en el móvil.</figcaption></figure>
+  </div>
+</section>
+
+<section class="salto" id="pantalla">
+  <div class="sec-h"><div><span class="paso">Visión general</span><h2>La pantalla de un vistazo</h2></div></div>
+  <figure><img src="01-pantalla.png" alt="Vista general de la calculadora con cinco zonas numeradas" width="1200" height="764" loading="lazy"><figcaption>Parte superior de la calculadora en el ordenador.</figcaption></figure>
+  <ol class="leyenda">
+    <li><span class="num">1</span><div><b>Logotipo de ACTM.</b> Enlace a la web de la asociación.</div></li>
+    <li><span class="num">2</span><div><b>Información legal e idioma.</b></div></li>
+    <li><span class="num">3</span><div><b>Última semana con precio</b> del Ministerio y botón para compartir la calculadora.</div></li>
+    <li><span class="num">4</span><div><b>Referencia</b>: el precio del gasóleo de la fecha del contrato (paso 1).</div></li>
+    <li><span class="num">5</span><div><b>Cálculo</b>: el precio del gasóleo cuando se hace el transporte (paso 2).</div></li>
+  </ol>
+  <p style="margin-top:14px">Más abajo están <b>Vehículo y contrato</b> (paso 3) y el <b>Resultado</b> (paso 4). Todo se recalcula al momento, sin pulsar ningún botón, y la calculadora recuerda tus últimos datos.</p>
+</section>
+
+<section id="referencia">
+  <div class="sec-h"><span class="num">1</span><div><span class="paso">Paso 1</span><h2>La referencia del contrato</h2></div></div>
+  <div class="dos">
+    <div>
+      <ol class="leyenda">
+        <li><span class="num">1</span><div><b>Elige cómo se toma el precio</b> de referencia (ver la tabla).</div></li>
+        <li><span class="num">2</span><div><b>Escribe la fecha, el mes o el precio</b>, según la opción elegida.</div></li>
+        <li><span class="num">3</span><div><b>Precio resultante</b>, en €/litro, y de qué semanas sale.</div></li>
+      </ol>
+      <div class="nota">Usa el método que diga tu contrato. Si no dice nada, lo habitual es la <b>fecha de firma</b> del contrato (opción <b>Día</b>).</div>
+    </div>
+    <figure><img src="02-referencia.png" alt="Panel de referencia con el selector de cinco opciones" width="575" height="396" loading="lazy"><figcaption>Referencia: día 01/01/2026 → precio publicado el 05/01/2026.</figcaption></figure>
+  </div>
+  <h3>Las cinco formas de tomar el precio</h3>
+  <div class="tablebox"><table>
+    <thead><tr><th>Opción</th><th>Qué precio usa</th><th>Cuándo usarla</th></tr></thead>
+    <tbody>
+      <tr><td><b>Manual</b></td><td>El precio que escribas, en €/litro.</td><td>El contrato fija un precio de referencia concreto.</td></tr>
+      <tr><td><b>Día</b></td><td>El precio de la primera semana publicada <b>igual o posterior</b> al día indicado.</td><td>Referencia o transporte en una fecha concreta.</td></tr>
+      <tr><td><b>Semana</b></td><td>El precio de la semana (de lunes a domingo) que contiene el día indicado.</td><td>El contrato habla de «la semana» de la firma o del servicio.</td></tr>
+      <tr><td><b>Mes</b></td><td>La media de los precios semanales publicados con fecha dentro del mes.</td><td>Revisiones mensuales con la media simple del mes.</td></tr>
+      <tr><td><b>Mes natural</b></td><td>La media de <b>todos los días del mes</b>: cada día toma el precio de la primera semana publicada igual o posterior a ese día.</td><td>Revisiones mensuales en las que cada día del mes pesa lo mismo.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="calculo">
+  <div class="sec-h"><span class="num">2</span><div><span class="paso">Paso 2</span><h2>El precio de cálculo</h2></div></div>
+  <div class="dos">
+    <figure><img src="03-calculo-mes-natural.png" alt="Panel de cálculo con la opción mes natural" width="575" height="396" loading="lazy"><figcaption>Cálculo: octubre de 2026 en mes natural.</figcaption></figure>
+    <div>
+      <p>Funciona igual que la referencia, con las mismas cinco opciones, pero para el <b>momento en que se hace el transporte</b>.</p>
+      <ol class="leyenda">
+        <li><span class="num">1</span><div><b>Opción elegida</b>: aquí, <b>Mes natural</b>.</div></li>
+        <li><span class="num">2</span><div><b>Precio resultante</b> y detalle de las semanas y los días que entran en la media.</div></li>
+      </ol>
+      <div class="nota"><b>Ejemplo de mes natural, octubre de 2026:</b> del 1 al 5 se usa el precio del 05/10; del 6 al 12, el del 12/10; del 13 al 19, el del 19/10; del 20 al 26, el del 26/10; y del 27 al 31, el del 02/11. Se promedian los 31 días.</div>
+      <p>Si el mes aún no ha terminado o faltan semanas por publicar, la calculadora hace la media con los días que ya tienen precio y <b>avisa de cuántos faltan</b>.</p>
+      <p>Con la opción <b>Manual</b> también se pide la <b>fecha del transporte</b>, porque decide la norma aplicable y el coeficiente C.</p>
+    </div>
+  </div>
+</section>
+
+<section class="salto" id="vehiculo">
+  <div class="sec-h"><span class="num">3</span><div><span class="paso">Paso 3</span><h2>Vehículo y contrato</h2></div></div>
+  <figure><img src="04-vehiculo-contrato.png" alt="Bloque de vehículo y contrato con cinco campos numerados" width="1108" height="330" loading="lazy"><figcaption>Vehículo y contrato.</figcaption></figure>
+  <ol class="leyenda">
+    <li><span class="num">1</span><div><b>Tipo de vehículo</b>, con su tramo de masa máxima autorizada (MMA). Decide el coeficiente C y qué precio del gasóleo se usa (ver la tabla).</div></li>
+    <li><span class="num">2</span><div><b>Precio pactado del transporte</b>, en euros, para calcular el importe de la revisión.</div></li>
+    <li><span class="num">3</span><div><b>Umbral de revisión</b>: 5 % por defecto, o el umbral más bajo que se haya pactado por escrito.</div></li>
+    <li><span class="num">4</span><div><b>Redondeo de G</b>: decimales con los que se redondea la variación del gasóleo antes de multiplicarla por C (2 por defecto).</div></li>
+    <li><span class="num">5</span><div><b>Contrato continuado</b>: márcalo si el contrato es de servicios continuados; la revisión se aplica entonces en cada facturación, aunque no se llegue al umbral.</div></li>
+  </ol>
+  <h3>Tipos de vehículo</h3>
+  <div class="tablebox"><table>
+    <thead><tr><th>Opción</th><th>Vehículo</th><th>Precio del gasóleo que usa</th></tr></thead>
+    <tbody>
+      <tr><td><b>A</b></td><td>MMA de 20.000 kg o más (salvo obras)</td><td>Pmed MMA ≥ 7,5 t</td></tr>
+      <tr><td><b>B ≥ 7,5 t</b></td><td>MMA desde 7.500 hasta 20.000 kg (salvo obras)</td><td>Pmed MMA ≥ 7,5 t</td></tr>
+      <tr><td><b>B &lt; 7,5 t</b></td><td>MMA de más de 3.500 y menos de 7.500 kg (salvo obras)</td><td>Pmed MMA &lt; 7,5 t</td></tr>
+      <tr><td><b>C ≥ 7,5 t</b></td><td>Obras, MMA desde 7.500 kg</td><td>Pmed MMA ≥ 7,5 t</td></tr>
+      <tr><td><b>C &lt; 7,5 t</b></td><td>Obras, MMA de más de 3.500 y menos de 7.500 kg</td><td>Pmed MMA &lt; 7,5 t</td></tr>
+      <tr><td><b>D</b></td><td>MMA de 3.500 kg o menos</td><td>Pmed MMA &lt; 7,5 t</td></tr>
+    </tbody>
+  </table></div>
+  <div class="nota"><b>Qué precio del gasóleo se usa.</b> Lo elige la calculadora según la fecha del transporte: desde el 16/04/2026, el <b>Pmed</b> (precio medio sin IVA; para MMA ≥ 7,5 t, además, sin la devolución del gasóleo profesional); del 22/03 al 15/04/2026, el <b>PAI</b> (precio antes de impuestos); y antes, el <b>PVP</b>. El mismo precio se usa en la referencia y en el cálculo, para comparar lo mismo con lo mismo.</div>
+</section>
+
+<section class="salto" id="resultado">
+  <div class="sec-h"><span class="num">4</span><div><span class="paso">Paso 4</span><h2>Leer el resultado</h2></div></div>
+  <figure><img src="05-resultado.png" alt="Bloque de resultado con seis elementos numerados" width="1108" height="292" loading="lazy"><figcaption>Resultado del ejemplo.</figcaption></figure>
+  <ol class="leyenda">
+    <li><span class="num">1</span><div><b>Variación del transporte</b>: el porcentaje en que hay que revisar el precio (G × C). Es la cifra que se aplica.</div></li>
+    <li><span class="num">2</span><div><b>Variación del gasóleo (G)</b> y el precio usado (aquí, Pmed MMA &lt; 7,5 t).</div></li>
+    <li><span class="num">3</span><div><b>Coeficiente C</b> y la norma de la que sale.</div></li>
+    <li><span class="num">4</span><div><b>Importe a revisar</b> sobre el precio pactado, y el nuevo precio.</div></li>
+    <li><span class="num">5</span><div><b>Veredicto</b>: si la revisión es obligatoria (G alcanza el umbral, o contrato continuado) o no.</div></li>
+    <li><span class="num">6</span><div><b>Compartir resultado</b> (paso 5).</div></li>
+  </ol>
+  <div class="ejemplo">
+    <h3>Ejemplo de la guía</h3>
+    <p style="margin:0">Camión <b>B de menos de 7,5 t</b>. Referencia: <b>día 01/01/2026</b> (precio publicado el 05/01/2026: 1,14493 €/l). Cálculo: <b>octubre de 2026, mes natural</b> (1,56610 €/l). Precio pactado: 1.000 €.</p>
+    <div class="cifras">
+      <div><small>Variación del gasóleo (G)</small><strong>+36,79 %</strong></div>
+      <div><small>Coeficiente C</small><strong>0,30</strong></div>
+      <div><small>Revisión del precio</small><strong>+11,04 %</strong></div>
+      <div><small>Importe</small><strong>+110,37 €</strong></div>
+    </div>
+  </div>
+  <p>C = 0,30 porque, desde el 01/07/2026 (RDL 18/2026), en un vehículo B el coeficiente es 0,30 cuando el Pmed del transporte está entre 1,28 y 2,13 €/l (aquí, 1,566 €/l). La tabla completa está en <b>Cómo se calcula</b>, al final de la calculadora.</p>
+</section>
+
+<section id="compartir">
+  <div class="sec-h"><span class="num">5</span><div><span class="paso">Paso 5</span><h2>Compartir el resultado</h2></div></div>
+  <div class="dos">
+    <div>
+      <p>El botón <b>Compartir resultado</b> crea una imagen con todos los datos del cálculo, lista para enviar al cliente o archivar:</p>
+      <ul>
+        <li><b>En el móvil</b> se abre el menú de compartir: elige WhatsApp, correo, etc.</li>
+        <li><b>En el ordenador</b> la imagen se copia: pégala con <b>Ctrl + V</b> en WhatsApp Web, en un correo o en un documento.</li>
+      </ul>
+      <p>La imagen recoge el vehículo, el precio usado, la referencia y el cálculo con sus fechas, la variación del gasóleo, el coeficiente, la revisión y si es obligatoria, con la fecha de los datos del Ministerio.</p>
+      <div class="nota">Para comunicar la revisión a un cliente, acompaña la imagen con la referencia legal: <b>Ley 15/2009, art. 38</b>.</div>
+    </div>
+    <figure class="mini"><img src="08-imagen-compartida.png" alt="Imagen que genera el botón Compartir resultado" width="1080" height="1350" loading="lazy"><figcaption>La imagen que se comparte.</figcaption></figure>
+  </div>
+</section>
+
+<section id="mas">
+  <div class="sec-h"><div><span class="paso">Para comprobar</span><h2>Gráfica, semanas utilizadas e información legal</h2></div></div>
+  <figure><img src="06-grafica-semanas.png" alt="Gráfica de la evolución del precio y tabla de las semanas utilizadas" width="1096" height="712" loading="lazy"><figcaption>Gráfica del precio usado y tabla «Semanas utilizadas».</figcaption></figure>
+  <p>La <b>gráfica</b> muestra la evolución del precio semanal del gasóleo, con las bandas de la referencia y del cálculo. En <b>Semanas utilizadas</b> están todos los precios del Ministerio que entran en el cálculo (PVP, PVP sin IVA, impuesto, PAI, devolución y Pmed), para comprobar cada cifra. <b>Cómo se calcula</b> explica la fórmula y las tablas del coeficiente C.</p>
+  <div class="dos" style="margin-top:8px">
+    <figure><img src="07-info-legal.png" alt="Bocadillo de información legal" width="640" height="560" loading="lazy"><figcaption>Botón «i»: información legal.</figcaption></figure>
+    <div>
+      <p>El botón <b>i</b> de la cabecera abre las <b>referencias legales</b> (Ley 15/2009, Orden FOM/1882/2012, RDL 9/2026 y RDL 18/2026) y el aviso de uso, con enlace a la calculadora oficial del Ministerio.</p>
+      <p>Con <b>ES / EN</b> puedes mostrar la calculadora en inglés, útil para clientes o cargadores extranjeros. La imagen que se comparte sale en el idioma elegido.</p>
+    </div>
+  </div>
+</section>
+
+<section class="salto" id="faq">
+  <div class="sec-h"><div><span class="paso">Dudas habituales</span><h2>Preguntas frecuentes</h2></div></div>
+  <dl class="faq">
+    <dt>¿Cuándo se actualizan los precios?</dt>
+    <dd>El Ministerio publica cada semana el precio medio del gasóleo. La calculadora lo comprueba varias veces al día y lo incorpora sola; la fecha aparece arriba, en «Última semana con precio».</dd>
+    <dt>¿Por qué un día sin precio muestra «—»?</dt>
+    <dd>Porque el Ministerio aún no ha publicado la semana que le corresponde. Con la opción Día se usa la primera semana publicada igual o posterior a la fecha; si todavía no existe, no hay precio.</dd>
+    <dt>¿Qué diferencia hay entre «Mes» y «Mes natural»?</dt>
+    <dd>«Mes» hace la media simple de las semanas publicadas en el mes. «Mes natural» pondera por días: cada día del mes cuenta lo mismo, así que una semana que cubre 7 días pesa más que una que cubre 2.</dd>
+    <dt>¿Por qué cambia el resultado si elijo B ≥ 7,5 t o B &lt; 7,5 t?</dt>
+    <dd>Porque el Ministerio publica dos precios medios (Pmed): para vehículos de 7,5 t o más se descuenta la devolución del gasóleo profesional. En las semanas en que esa devolución es cero, los dos precios coinciden; cuando no, el resultado cambia. Elige siempre el tramo real de tu vehículo.</dd>
+    <dt>¿Puedo fijar el coeficiente C a mano?</dt>
+    <dd>Sí, con la casilla «Fijar C a mano», si el contrato pacta un coeficiente concreto.</dd>
+    <dt>¿El resultado es vinculante?</dt>
+    <dd>Es un cálculo orientativo que depende de los datos que introduzcas. Ante una reclamación o un litigio, contrástalo con la calculadora oficial del Ministerio de Transportes, enlazada desde el botón «i».</dd>
+  </dl>
+</section>
+
+</main>
+
+<footer>
+  <span>Una herramienta de <b>ACTM</b> · Asociación Empresarial Castellonense de Transportes de Mercancías</span>
+  <span><a href="https://actm.es/">actm.es</a> · <a href="../">Abrir la calculadora</a></span>
+</footer>
+</body>
+</html>
