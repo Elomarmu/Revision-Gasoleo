@@ -42,10 +42,13 @@ p{margin:0 0 12px}
 .hero .eyebrow{font:600 13px/1 var(--f);letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px}
 .hero h1{font-weight:700;text-transform:uppercase;font-size:clamp(26px,4.4vw,42px);letter-spacing:.005em;max-width:20ch}
 .hero .sub{margin-top:14px;font-weight:500;font-size:16px;max-width:52ch}
-.qr{background:#fff;padding:14px;text-align:center;width:200px}
+.qr{display:block;background:#fff;padding:14px;text-align:center;width:200px;color:var(--negro);text-decoration:none}
+.qr b{text-decoration:underline;text-decoration-color:var(--amarillo);text-decoration-thickness:2px;text-underline-offset:3px}
 .qr img{width:172px;height:172px;margin:0 auto}
 .qr b{display:block;font:600 12px/1.35 var(--f);margin-top:8px;word-break:break-all}
 .hero .acciones{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.solo-print{display:none}
+.enlace-pdf{margin-top:14px;font-weight:600}
 
 main{max-width:960px;margin:0 auto;padding:8px max(16px,env(safe-area-inset-left,0px)) 40px}
 section{background:#fff;border:1px solid var(--linea);border-radius:12px;padding:28px clamp(18px,3vw,34px);margin-top:22px}
@@ -103,6 +106,7 @@ footer b{color:var(--tinta)}
   body{background:#fff;font-size:10.5pt;line-height:1.5}
   .brand{position:static;box-shadow:none;border-bottom:3px solid var(--amarillo)}
   .brand .btn,.hero .acciones,.solo-web{display:none!important}
+  .solo-print{display:block!important}
   .hero{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .hero-in{padding:26px 6mm 30px}
   .qr{display:block}
@@ -151,9 +155,10 @@ footer b{color:var(--tinta)}
       <p class="eyebrow">Guía para los asociados</p>
       <h1>Calculadora de revisión del precio del transporte por gasóleo</h1>
       <p class="sub">Cómo calcular, en un minuto y desde el móvil, cuánto hay que revisar el precio de un transporte por la variación del gasóleo, con los precios oficiales del Ministerio de Transportes.</p>
+      <p class="solo-print enlace-pdf">Calculadora: <a href="https://actm.es/calculadora-actm/">actm.es/calculadora-actm</a></p>
       <div class="acciones"><a class="btn" href="https://actm.es/calculadora-actm/">Abrir la calculadora</a><a class="btn am" href="Guia-calculadora-gasoleo-ACTM.pdf" download>Descargar la guía en PDF</a></div>
     </div>
-    <div class="qr"><img src="qr.svg" alt="Código QR de la calculadora" width="172" height="172"><b>actm.es/<br>calculadora-actm</b></div>
+    <a class="qr" href="https://actm.es/calculadora-actm/"><img src="qr.svg" alt="Código QR de la calculadora" width="172" height="172"><b>actm.es/<br>calculadora-actm</b></a>
   </div>
 </div>
 
@@ -187,10 +192,10 @@ footer b{color:var(--tinta)}
   <div class="dos">
     <div>
       <p>Entra en la web de ACTM, <a href="https://actm.es/calculadora-actm/">actm.es/calculadora-actm</a>, o escanea el código QR de la portada, y abre la calculadora desde allí. Funciona en cualquier móvil, tableta u ordenador, sin registrarse.</p>
-      <p>Para tenerla como una app más, con su icono en la pantalla de inicio, ábrela desde <b>actm.es/calculadora-actm</b> y usa estos botones de la calculadora:</p>
+      <p>Para tenerla como una app más, con su icono en la pantalla de inicio, ábrela desde <a href="https://actm.es/calculadora-actm/"><b>actm.es/calculadora-actm</b></a> y usa estos botones de la calculadora:</p>
       <ol class="leyenda">
         <li><span class="num">1</span><div><b>Información legal e idioma.</b> El botón <b>i</b> abre las referencias legales y el aviso de uso. <b>ES / EN</b> cambia entre español e inglés. Esta franja se queda siempre arriba.</div></li>
-        <li><span class="num">2</span><div><b>Compartir la app.</b> Envía a un compañero la dirección <b>actm.es/calculadora-actm</b> (WhatsApp, correo…).</div></li>
+        <li><span class="num">2</span><div><b>Compartir la app.</b> Envía a un compañero la dirección <a href="https://actm.es/calculadora-actm/"><b>actm.es/calculadora-actm</b></a> (WhatsApp, correo…).</div></li>
         <li><span class="num">3</span><div><b>Instalar app.</b> En Android (Chrome) y en el ordenador (Chrome o Edge) se abre la ventana de instalación. Si tu navegador no la ofrece, el botón te dice cómo hacerlo: en <b>iPhone</b>, desde Safari, botón <b>Compartir</b> → <b>Añadir a pantalla de inicio</b>; en otros navegadores, menú <b>⋮</b> → <b>Instalar aplicación</b> o <b>Añadir a pantalla de inicio</b>. Si ya la tienes instalada y la abres desde su icono, el botón no aparece.</div></li>
       </ol>
       <div class="nota">Debajo del título verás la <b>última semana con precio</b> publicada por el Ministerio. El Ministerio publica un precio nuevo cada semana y la calculadora lo incorpora sola.</div>
