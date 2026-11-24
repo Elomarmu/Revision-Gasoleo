@@ -2,7 +2,7 @@
 // - Precios (../data.json, compartidos con la calculadora principal): primero la red; sin conexión, la última copia.
 // - La página: primero la red; sin conexión, la copia guardada.
 // - Imágenes, manifiesto y tipografías: copia guardada y actualización por detrás.
-const VERSION = "actm-gasoleo-v1";
+const VERSION = "actm-gasoleo-v2";
 const BASICOS = [
   "./", "manifest.webmanifest", "../data.json",
   "img/actm-marca.png", "img/favicon.png", "img/apple-touch-icon.png",
@@ -41,6 +41,9 @@ self.addEventListener("fetch", (e) => {
   if (!propio && !fuentes) return;
 
   if (req.mode === "navigate") {
+    // Solo la calculadora: la guía (/actm/guia/) es otra página
+    const base = new URL("./", self.registration.scope).pathname;
+    if (url.pathname !== base && url.pathname !== base + "index.html") return;
     const pagina = new Request(new URL("./", self.registration.scope));
     e.respondWith(
       fetch(req, { cache: "no-cache" })
