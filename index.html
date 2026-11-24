@@ -287,10 +287,12 @@ tr.in-real td{background:var(--band-b)}
     <div class="fields">
       <div class="field"><label for="veh">Tipo de vehículo</label>
         <select id="veh">
-          <option value="A">A · MMA ≥ 20.000 kg (salvo obras)</option>
-          <option value="B">B · MMA entre 3.500 y 20.000 kg (salvo obras)</option>
-          <option value="C">C · Obras con MMA &gt; 3.500 kg</option>
-          <option value="D">D · MMA ≤ 3.500 kg</option>
+          <option value="A|1">A · MMA ≥ 20.000 kg (salvo obras)</option>
+          <option value="B|1">B · MMA desde 7.500 hasta 20.000 kg (salvo obras)</option>
+          <option value="B|0">B · MMA de más de 3.500 y menos de 7.500 kg (salvo obras)</option>
+          <option value="C|1">C · Obras con MMA desde 7.500 kg</option>
+          <option value="C|0">C · Obras con MMA de más de 3.500 y menos de 7.500 kg</option>
+          <option value="D|0">D · MMA ≤ 3.500 kg</option>
         </select></div>
       <div class="field"><label for="basis">Precio para calcular G</label>
         <select id="basis">
@@ -313,7 +315,6 @@ tr.in-real td{background:var(--band-b)}
         </select></div>
     </div>
     <div class="fields" style="align-items:center">
-      <label class="check"><input type="checkbox" id="gp"> Vehículo de MMA ≥ 7,5 t (con devolución de gasóleo profesional)</label>
       <label class="check"><input type="checkbox" id="cont"> Contrato de transporte continuado (revisión en cada facturación)</label>
       <label class="check"><input type="checkbox" id="cMan"> Fijar C a mano</label>
       <div class="field" style="flex:0 1 120px" id="cManBox" hidden><label for="cVal">Coeficiente C</label><input type="number" id="cVal" min="0" max="1" step="0.05"></div>
@@ -462,15 +463,16 @@ const STATIC_EN=[
  [".seg button[data-mode=date]","Date"],[".seg button[data-mode=month]","Month"],
  ["[data-for=date] label","Date"],["[data-for=month] label","Month"],[".readout .unit","€/litre"],
  ["#hSet","Vehicle and contract"],["label[for=veh]","Vehicle type"],
- ["#veh option[value=A]","A · MAM ≥ 20,000 kg (except construction)"],["#veh option[value=B]","B · MAM 3,500–20,000 kg (except construction)"],
- ["#veh option[value=C]","C · Construction vehicles, MAM &gt; 3,500 kg"],["#veh option[value=D]","D · MAM ≤ 3,500 kg"],
+ ["#veh option[value='A|1']","A · MAM ≥ 20,000 kg (except construction)"],["#veh option[value='B|1']","B · MAM from 7,500 up to 20,000 kg (except construction)"],
+ ["#veh option[value='B|0']","B · MAM over 3,500 and under 7,500 kg (except construction)"],["#veh option[value='C|1']","C · Construction vehicles, MAM from 7,500 kg"],
+ ["#veh option[value='C|0']","C · Construction vehicles, MAM over 3,500 and under 7,500 kg"],["#veh option[value='D|0']","D · MAM ≤ 3,500 kg"],
  ["label[for=basis]","Price used to calculate G"],
  ["#basis option[value=auto]","Automatic, based on date of carriage"],["#basis option[value=pmed]","Pmed (pump price excl. VAT and professional diesel refund)"],
  ["#basis option[value=pai]","Pre-tax price (PAI)"],["#basis option[value=pvpsin]","Pump price excl. VAT"],["#basis option[value=pvp]","Pump price"],
  ["label[for=price]","Agreed haulage price (€)"],["label[for=thr]","Revision threshold (%)"],["label[for=rnd]","Rounding of G (decimal places of the %)"],
  ["#rnd option[value=none]","No rounding"],["#rnd option[value='0']","0 decimal places (43%)"],["#rnd option[value='1']","1 decimal place (42.6%)"],
  ["#rnd option[value='2']","2 decimal places (42.57%)"],["#rnd option[value='3']","3 decimal places (42.573%)"],["#rnd option[value='4']","4 decimal places (42.5731%)"],
- ["#gp","@tail:Vehicle with MAM ≥ 7.5 t (eligible for professional diesel refund)"],["#cont","@tail:Continuous haulage contract (revised at each billing period)"],
+ ["#cont","@tail:Continuous haulage contract (revised at each billing period)"],
  ["#cMan","@tail:Set C manually"],["label[for=cVal]","Coefficient C"],
  ["#hRes","Result"],[".result .row > div:nth-child(1) .k","Change in haulage price"],[".result .row > div:nth-child(2) .k","Change in diesel price (G)"],
  [".result .row > div:nth-child(3) .k","Coefficient C"],[".result .row > div:nth-child(4) .k","Amount to revise (ΔP)"],
@@ -572,12 +574,12 @@ function bindPanel(key,panelId,prefix){
   ["Date","Month"].forEach(k=>{const el=$(prefix+k);el.addEventListener("change",()=>{S[key][k.toLowerCase()]=el.value;calc()})});
 }
 bindPanel("ref","pRef","ref"); bindPanel("real","pReal","real");
-$("veh").addEventListener("change",e=>{S.veh=e.target.value;if(S.veh==="A")S.gp=true;if(S.veh==="D")S.gp=false;sync();calc()});
+// El tramo de peso (≥ 7,5 t o < 7,5 t) va en el propio tipo de vehículo: decide la columna de Pmed
+$("veh").addEventListener("change",e=>{const[v,g]=e.target.value.split("|");S.veh=v;S.gp=g==="1";sync();calc()});
 $("basis").addEventListener("change",e=>{S.basis=e.target.value;calc()});
 $("price").addEventListener("input",e=>{S.price=parseFloat(e.target.value);calc()});
 $("thr").addEventListener("input",e=>{S.thr=parseFloat(e.target.value);calc()});
 $("rnd").addEventListener("change",e=>{S.rnd=e.target.value;calc()});
-$("gp").addEventListener("change",e=>{S.gp=e.target.checked;calc()});
 $("cont").addEventListener("change",e=>{S.cont=e.target.checked;calc()});
 $("cMan").addEventListener("change",e=>{S.cMan=e.target.checked;sync();calc()});
 $("cVal").addEventListener("input",e=>{S.cVal=parseFloat(e.target.value);calc()});
@@ -589,8 +591,8 @@ function sync(){
     p.querySelectorAll("[data-for]").forEach(f=>f.hidden=f.dataset.for!==m);
     $(pre+"Date").value=S[key].date||"";$(pre+"Month").value=S[key].month||"";
   }
-  $("veh").value=S.veh;$("basis").value=S.basis;$("price").value=isFinite(S.price)?S.price:"";$("thr").value=isFinite(S.thr)?S.thr:"";$("rnd").value=S.rnd;
-  $("gp").checked=S.gp;$("gp").disabled=S.veh==="A"||S.veh==="D";$("cont").checked=S.cont;
+  if(!["A","B","C","D"].includes(S.veh))S.veh="A";if(S.veh==="A")S.gp=true;if(S.veh==="D")S.gp=false;S.gp=!!S.gp;$("veh").value=S.veh+"|"+(S.gp?1:0);$("basis").value=S.basis;$("price").value=isFinite(S.price)?S.price:"";$("thr").value=isFinite(S.thr)?S.thr:"";$("rnd").value=S.rnd;
+  $("cont").checked=S.cont;
   $("cMan").checked=S.cMan;$("cManBox").hidden=!S.cMan;$("cVal").value=S.cVal;
 }
 
